@@ -8,7 +8,6 @@
 	function logout() {
 		auth.set({ username: null, token: null });
 		goto('/auth');
-		
 	}
 </script>
 
