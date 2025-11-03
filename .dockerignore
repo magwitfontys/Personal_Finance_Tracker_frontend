@@ -1,17 +1,9 @@
-# Git / editors
+node_modules
 .git
 .gitignore
 .vscode
-.idea
-
-# Node/SvelteKit
-node_modules
 .svelte-kit
-build
-dist
 coverage
-*.log
-
-# Don’t send local env files into the image
-.env
-.env.*
+dist
+build
+Dockerfile*
