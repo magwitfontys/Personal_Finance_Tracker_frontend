@@ -71,12 +71,12 @@
 				password: login.password
 			});
 
-			// Your controller returns { success: true } on OK. Use token if you later add it.
+			// If backend returns a token, store it. If not, 'success' is still enough.
 			if (data.token) localStorage.setItem('token', data.token);
 			if (data.success === true || data.token) {
 				localStorage.setItem('auth', '1');
 				localStorage.setItem('username', login.username);
-				goto('/dashboard');
+				goto('/dashboard'); // literal path
 			} else {
 				login.error = 'Login failed.';
 			}
@@ -114,7 +114,7 @@
 	<div class="wrap">
 		<div class="card">
 			<div class="logo">
-				<img src={chart} alt="icon" width="25px" height="25px" />
+				<img src={chart} alt="icon" width="25" height="25" />
 			</div>
 			<h1 class="title">Personal Finance Tracker</h1>
 			<p class="tagline">Manage your finances with ease</p>
