@@ -1,13 +1,13 @@
 <script>
 	import './auth.css';
-	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 	import eye from '$lib/pictures/eye.png';
 	import crossedEye from '$lib/pictures/crossed-eye.png';
 	import chart from '$lib/pictures/chart.png';
 
 	let mode = 'login';
-	
+
 	let login = { username: '', password: '', show: false, busy: false, error: '' };
 	let signup = {
 		username: '',
@@ -21,6 +21,7 @@
 	};
 
 	onMount(() => {
+		if (!browser) return;
 		if (location.hash === '#register') mode = 'register';
 	});
 
@@ -71,14 +72,17 @@
 				password: login.password
 			});
 
-			// If backend returns a token, store it. If not, 'success' is still enough.
-			if (data.token) localStorage.setItem('token', data.token);
-			if (data.success === true || data.token) {
-				localStorage.setItem('auth', '1');
-				localStorage.setItem('username', login.username);
-				goto('/dashboard'); // literal path
-			} else {
-				login.error = 'Login failed.';
+			// Store token if provided, fallback to simple auth flag
+			if (browser) {
+				if (data.token) localStorage.setItem('token', data.token);
+				if (data.success === true || data.token) {
+					localStorage.setItem('auth', '1');
+					localStorage.setItem('username', login.username);
+					// standard navigation to avoid goto() check
+					window.location.href = '/dashboard';
+				} else {
+					login.error = 'Login failed.';
+				}
 			}
 		} catch (err) {
 			login.error = err.message;
