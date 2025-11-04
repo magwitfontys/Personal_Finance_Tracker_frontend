@@ -7,7 +7,7 @@
 	import chart from '$lib/pictures/chart.png';
 
 	let mode = 'login';
-
+	
 	let login = { username: '', password: '', show: false, busy: false, error: '' };
 	let signup = {
 		username: '',
