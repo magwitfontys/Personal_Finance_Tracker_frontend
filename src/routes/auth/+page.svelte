@@ -1,5 +1,5 @@
 <script>
-	import './auth.css';
+	import '$lib/styles/auth.css';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import eye from '$lib/pictures/eye.png';
