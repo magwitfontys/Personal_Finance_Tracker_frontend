@@ -2,18 +2,22 @@
 	import { onMount } from 'svelte';
 	import '$lib/styles/add-transaction.css';
 
-	// icons (purely visual)
+	/* icons (button only) */
 	import addIcon from '$lib/pictures/white-add.png';
 
-	// local UI state (no API here yet)
+	/* local UI state (no API yet) */
 	let type = 'expense';        // 'expense' | 'income'
 	let amount = '';
-	let category = '';
+	let category = '';           // selected category label
 	let date = '';
 	let description = '';
 
+	/* dropdown state + options */
+	let showCategoryMenu = false;
+	const categories = ['Groceries', 'Transportation', 'Utilities', 'Entertainment'];
+
 	onMount(() => {
-		// default date = today (yyyy-mm-dd) so it works with <input type="date">
+		// default date = today (yyyy-mm-dd)
 		const d = new Date();
 		const yyyy = d.getFullYear();
 		const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -23,18 +27,26 @@
 
 	function selectType(next) { type = next; }
 
+	function chooseCategory(c) {
+		category = c;
+		showCategoryMenu = false;
+	}
+
 	function submit(e) {
 		e.preventDefault();
-		// UI-only for now—no API call.
+		// UI-only preview
 		console.log('Preview payload:', { type, amount, category, date, description });
 	}
 </script>
+
+<!-- click-outside to close the dropdown -->
+<svelte:window on:click={() => (showCategoryMenu = false)} />
 
 <section class="page-wrap">
 	<form class="card" on:submit|preventDefault={submit}>
 		<h2 class="card-title">Add Transaction</h2>
 
-		<!-- Type (use fieldset/legend instead of label so a11y is happy) -->
+		<!-- Type -->
 		<div class="field">
 			<fieldset class="fieldset">
 				<legend class="label">Type</legend>
@@ -76,22 +88,42 @@
 				placeholder="0.00"
 				bind:value={amount}
 				min="0"
-				aria-describedby="amountHelp"
 			/>
-			<div id="amountHelp" class="help"></div>
 		</div>
 
-		<!-- Category -->
-		<div class="field">
-			<label class="label" for="category">Category</label>
-			<select id="category" class="select" bind:value={category}>
-				<option value="" disabled selected>Select a category</option>
-				<!-- placeholder options for now; will be loaded from API later -->
-				<option value="groceries">Groceries</option>
-				<option value="transportation">Transportation</option>
-				<option value="utilities">Utilities</option>
-				<option value="entertainment">Entertainment</option>
-			</select>
+		<!-- Category (custom dropdown) -->
+		<div class="field" on:click|stopPropagation>
+			<label class="label">Category</label>
+
+			<div class="menu">
+				<button
+					type="button"
+					class="menu-btn"
+					aria-haspopup="listbox"
+					aria-expanded={showCategoryMenu}
+					on:click={() => (showCategoryMenu = !showCategoryMenu)}
+					on:keyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (showCategoryMenu = !showCategoryMenu)}
+				>
+					<span>{category || 'Select a category'}</span>
+					<span class="chev" aria-hidden="true">▾</span>
+				</button>
+
+				{#if showCategoryMenu}
+					<ul class="menu-panel wide" role="listbox" aria-label="Category">
+						{#each categories as c}
+							<li
+								class="menu-item"
+								role="option"
+								aria-selected={category === c}
+								on:click={() => chooseCategory(c)}
+							>
+								<span>{c}</span>
+								{#if category === c}<span class="check">✓</span>{/if}
+							</li>
+						{/each}
+					</ul>
+				{/if}
+			</div>
 		</div>
 
 		<!-- Date -->

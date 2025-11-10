@@ -92,16 +92,17 @@
   background: transparent;
 }
 
-.chip.expense .chip-text { color: #d34a4a; } /* red text like prototype */
-.chip.income  .chip-text { color: #229954; } /* green text like prototype */
+.chip.expense .chip-text { color: #d34a4a; } /* red */
+.chip.income  .chip-text { color: #229954; } /* green */
 
+/* SELECTED DOT COLORS */
 .chip.expense.active .dot {
-  border-color: #111;
-  background: #111;      /* filled dot when selected */
+  border-color: #d34a4a;
+  background: #d34a4a;     /* red */
 }
 .chip.income.active .dot {
   border-color: #229954;
-  background: #229954;   /* filled green dot when selected */
+  background: #229954;     /* green */
 }
 
 /* Actions */
@@ -117,7 +118,7 @@
   padding: 0 1rem;
   border: none;
   border-radius: 10px;
-  background: #0b0b1a;     /* dark pill like your prototype */
+  background: #0b0b1a;
   color: #fff;
   font-weight: 700;
   cursor: pointer;
@@ -132,6 +133,58 @@
   display: block;
   object-fit: contain;
 }
+
+/* ===== Custom dropdown (full-width) ===== */
+.menu { position: relative; width: 100%; }           /* make container full width */
+.menu-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  border: 1px solid transparent;
+  background: #f3f3f6;
+  border-radius: 12px;
+  padding: .55rem .75rem;
+  cursor: pointer;
+  font: inherit;
+  color: #111;
+  width: 100%;                                        /* button spans full width */
+  justify-content: space-between;
+}
+.menu-btn .chev { opacity: .6; }
+
+.menu-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;                                           /* stretch to container */
+  width: 100%;                                        /* panel spans full width */
+  min-width: 0;
+  background: #fff;
+  border: 1px solid #ececf1;
+  border-radius: 12px;
+  box-shadow:
+    0 10px 15px rgba(0,0,0,.06),
+    0 4px 6px rgba(0,0,0,.05);
+  padding: .3rem;
+  display: grid;
+  gap: .2rem;
+  z-index: 40;
+}
+.menu-panel.wide { max-height: 320px; overflow: auto; }
+
+.menu-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: .75rem;
+  padding: .55rem .6rem;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.menu-item:hover { background: #f6f6fa; }
+.menu-item[aria-selected="true"] { background: #f1f1f7; }
+.menu-item .check { color: #666; }
+/* ===== end custom dropdown ===== */
 
 /* Nice wide form on big screens; comfortable on small */
 @media (min-width: 900px) {
