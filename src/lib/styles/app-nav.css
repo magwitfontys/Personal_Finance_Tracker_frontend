@@ -1,144 +1,136 @@
-:root {
-	--nav-bg: #ffffff;
-	--ink: #0f172a;
-	--muted-ink: #334155;
-	--accent: #0b0b1a;      /* active pill bg */
-	--accent-ink: #ffffff;  /* active pill text */
-	--border: #e5e7eb;
-	--pill-bg: #eef2ff;
-	--focus: #2563eb;
-	--radius: 14px;
-	--height: 68px;
-	--icon: 24px;
-}
-
+/* Header bar */
 .app-nav {
-	background: var(--nav-bg);
-	border-bottom: 1px solid var(--border);
-	position: sticky;
-	top: 0;
-	z-index: 50;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: #fff;
+  border-bottom: 1px solid #eee;
 }
+
+/* 3-column grid:
+   [brand] | [links centered] | [actions] */
 .nav-inner {
-	height: var(--height);
-	max-width: 1200px;
-	margin: 0 auto;
-	padding: 0 20px;
-	display: flex;
-	align-items: center;
-	gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.75rem 1rem;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
 }
 
-/* Brand */
+/* Brand (left) */
 .brand {
-	display: inline-flex;
-	align-items: center;
-	gap: 12px;
-	text-decoration: none;
-	color: var(--ink);
-	white-space: nowrap;
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+  color: #111;
+  font-weight: 600;
 }
+
+/* Bigger icon box so the brand pops */
+.icon--brand {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #111;  /* keeps your white PNG visible */
+}
+.icon--brand .icon-img {
+  width: 24px;
+  height: 24px;
+  display: block;
+  object-fit: contain;
+}
+
+/* Eye-catching brand text */
 .brand-text {
-	font-size: 22px;
-	font-weight: 700;
+  font-size: 2rem;   /* ~double body size */
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  line-height: 1;
 }
-.icon {
-	width: var(--icon);
-	height: var(--icon);
-	display: inline-block;
-	background-size: cover;
-	background-position: center;
-	border-radius: 6px;
-}
-
-/* Icon placeholders: invisible until you wire images */
-.icon:empty,
-.icon.icon--brand,
-.icon.icon--dashboard,
-.icon.icon--add,
-.icon.icon--transactions,
-.icon.icon--logout {
-	background-color: transparent;
-}
-
-/* When you add files, just uncomment and point at /src/lib/pictures/... 
-.icon--brand        { background-image: url('/src/lib/pictures/brand.png'); }
-.icon--dashboard    { background-image: url('/src/lib/pictures/dashboard.png'); }
-.icon--add          { background-image: url('/src/lib/pictures/add.png'); }
-.icon--transactions { background-image: url('/src/lib/pictures/transactions.png'); }
-.icon--logout       { background-image: url('/src/lib/pictures/logout.png'); }
-*/
 
 /* Center links */
 .nav-links {
-	list-style: none;
-	display: flex;
-	align-items: center;
-	gap: 28px;
-	margin: 0;
-	padding: 0;
-	flex: 1; /* pushes right section to edge */
+  justify-self: center;     /* centers the link group */
+  display: flex;
+  gap: 0.25rem;
+  list-style: none;         /* remove bullets */
+  margin: 0;
+  padding: 0;
 }
 .nav-link {
-	display: inline-flex;
-	align-items: center;
-	gap: 10px;
-	padding: 12px 18px;
-	border-radius: 14px;
-	text-decoration: none;
-	color: var(--ink);
-	font-weight: 600;
-	line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  text-decoration: none;
+  color: #111;
+  opacity: 0.9;
 }
-.nav-link:hover {
-	background: #f8fafc;
+.nav-link:hover { opacity: 1; }
+
+/* When link is active, make text white and icon white */
+.nav-link.is-active,
+.nav-link[aria-current="page"],
+.nav-link[data-active="true"] {
+  background: #111;
+  color: #fff;
+  opacity: 1;
 }
-.nav-link.is-active {
-	background: var(--accent);
-	color: var(--accent-ink);
+.nav-link.is-active .nav-icon,
+.nav-link[aria-current="page"] .nav-icon,
+.nav-link[data-active="true"] .nav-icon {
+  filter: invert(1);        /* turn dark PNGs into white */
 }
 
-/* Right area */
+/* The small icons inside links/buttons */
+.nav-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+  object-fit: contain;
+}
+
+/* Right side (user + logout) */
 .nav-right {
-	margin-left: auto;
-	display: flex;
-	align-items: center;
-	gap: 16px;
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 .user-pill {
-	background: var(--pill-bg);
-	color: var(--muted-ink);
-	padding: 8px 12px;
-	border-radius: 999px;
-	font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid #e6e6e6;
+  border-radius: 9999px;
+  background: #f8f8f8;
+  font-size: 0.85rem;
+  white-space: nowrap;
 }
-.logout {
-	display: inline-flex;
-	align-items: center;
-	gap: 10px;
-	background: transparent;
-	border: 0;
-	color: var(--ink);
-	font-weight: 700;
-	cursor: pointer;
-	padding: 10px 12px;
-	border-radius: var(--radius);
+.logout, .logout-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }
-.logout:hover {
-	background: #f8fafc;
-}
+.logout:hover, .logout-btn:hover { background: #f1f1f1; }
 
-/* Focus states */
-.logout:focus-visible,
-.nav-link:focus-visible,
-.brand:focus-visible {
-	outline: 2px solid var(--focus);
-	outline-offset: 2px;
-}
-
-/* Responsive tweaks */
-@media (max-width: 820px) {
-	.brand-text { display: none; }
-	.nav-links { gap: 14px; }
-	.nav-link { padding: 10px 12px; }
+/* Mobile tweaks */
+@media (max-width: 640px) {
+  .nav-inner { grid-template-columns: 1fr 1fr; }
+  .nav-links { display: none; }
+  .icon--brand { width: 32px; height: 32px; }
+  .icon--brand .icon-img { width: 20px; height: 20px; }
+  .brand-text { font-size: 1.5rem; }
 }

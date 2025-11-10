@@ -1,0 +1,139 @@
+/* Layout */
+.page-wrap {
+  padding: 1.25rem 1rem 2.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.card {
+  width: 100%;
+  max-width: 720px;
+  background: #fff;
+  border: 1px solid #e9e9ee;
+  border-radius: 18px;
+  padding: 1.25rem 1.25rem 1.5rem;
+  box-shadow: 0 0 0 rgba(0,0,0,0);
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: .25rem 0 1rem;
+}
+
+/* Fields */
+.field { margin-bottom: 1rem; }
+
+/* reset for our a11y-friendly fieldset */
+.fieldset { border: 0; padding: 0; margin: 0; }
+
+.label {
+  display: block;
+  font-size: .95rem;
+  font-weight: 600;
+  margin-bottom: .45rem;
+  color: #1a1a1a;
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  border: 1px solid transparent;
+  background: #f3f3f6;
+  color: #111;
+  padding: .9rem 0.9rem;
+  border-radius: 12px;
+  outline: none;
+  transition: border .15s ease, box-shadow .15s ease, background .15s ease;
+  box-sizing: border-box;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  border: 1px solid #111;
+  background: #f7f7fa;
+  box-shadow: 0 0 0 3px rgba(17,17,17,.08);
+}
+
+.textarea { resize: vertical; }
+
+.help {
+  font-size: .8rem;
+  color: #999;
+  margin-top: .35rem;
+}
+
+/* Type chips (Expense / Income) */
+.type-toggle {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .2rem .35rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 999px;
+  user-select: none;
+}
+
+.chip .dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  border: 2px solid #ddd;
+  background: transparent;
+}
+
+.chip.expense .chip-text { color: #d34a4a; } /* red text like prototype */
+.chip.income  .chip-text { color: #229954; } /* green text like prototype */
+
+.chip.expense.active .dot {
+  border-color: #111;
+  background: #111;      /* filled dot when selected */
+}
+.chip.income.active .dot {
+  border-color: #229954;
+  background: #229954;   /* filled green dot when selected */
+}
+
+/* Actions */
+.actions { margin-top: .25rem; }
+
+.btn-primary {
+  width: 100%;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .6rem;
+  padding: 0 1rem;
+  border: none;
+  border-radius: 10px;
+  background: #0b0b1a;     /* dark pill like your prototype */
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter .15s ease, transform .02s ease;
+}
+.btn-primary:hover { filter: brightness(1.05); }
+.btn-primary:active { transform: translateY(1px); }
+
+.btn-icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+  object-fit: contain;
+}
+
+/* Nice wide form on big screens; comfortable on small */
+@media (min-width: 900px) {
+  .card { padding: 1.35rem 1.5rem 1.7rem; }
+}
