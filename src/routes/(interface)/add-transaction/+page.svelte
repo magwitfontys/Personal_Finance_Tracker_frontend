@@ -92,33 +92,57 @@
 		</div>
 
 		<!-- Category (custom dropdown) -->
-		<div class="field" on:click|stopPropagation>
-			<label class="label">Category</label>
+		<div class="field">
+			<label class="label" for="category">Category</label>
 
 			<div class="menu">
 				<button
+					id="category"
 					type="button"
 					class="menu-btn"
 					aria-haspopup="listbox"
 					aria-expanded={showCategoryMenu}
-					on:click={() => (showCategoryMenu = !showCategoryMenu)}
-					on:keyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (showCategoryMenu = !showCategoryMenu)}
+					aria-controls="category-panel"
+					on:click={(e) => {
+						e.stopPropagation();
+						showCategoryMenu = !showCategoryMenu;
+					}}
+					on:keydown={(e) => {
+						// make toggle keyboard friendly
+						if (e.key === 'Enter' || e.key === ' ') {
+							e.preventDefault();
+							showCategoryMenu = !showCategoryMenu;
+						}
+						if (e.key === 'Escape') {
+							showCategoryMenu = false;
+						}
+					}}
 				>
 					<span>{category || 'Select a category'}</span>
 					<span class="chev" aria-hidden="true">▾</span>
 				</button>
 
 				{#if showCategoryMenu}
-					<ul class="menu-panel wide" role="listbox" aria-label="Category">
-						{#each categories as c}
-							<li
-								class="menu-item"
-								role="option"
-								aria-selected={category === c}
-								on:click={() => chooseCategory(c)}
-							>
-								<span>{c}</span>
-								{#if category === c}<span class="check">✓</span>{/if}
+					<ul id="category-panel" class="menu-panel wide" role="listbox" aria-labelledby="category">
+						{#each categories as c, i}
+							<li>
+								<button
+									type="button"
+									class="menu-item"
+									role="option"
+									aria-selected={category === c}
+									on:click={(e) => {
+										e.stopPropagation();
+										chooseCategory(c);
+									}}
+									on:keydown={(e) => {
+										// Enter/Space handled by button natively; allow Esc to close
+										if (e.key === 'Escape') { showCategoryMenu = false; }
+									}}
+								>
+									<span>{c}</span>
+									{#if category === c}<span class="check">✓</span>{/if}
+								</button>
 							</li>
 						{/each}
 					</ul>
