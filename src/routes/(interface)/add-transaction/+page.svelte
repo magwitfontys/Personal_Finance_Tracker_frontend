@@ -1,41 +1,88 @@
 <script>
 	import { onMount } from 'svelte';
+	import { PUBLIC_API_BASE } from '$env/static/public';
 	import '$lib/styles/add-transaction.css';
 
 	/* icons (button only) */
 	import addIcon from '$lib/pictures/white-add.png';
 
-	/* local UI state (no API yet) */
-	let type = 'expense';        // 'expense' | 'income'
+	// Base for API calls
+	const API_BASE = (PUBLIC_API_BASE || '/api').replace(/\/$/, '');
+
+	/* local UI state */
+	let type = 'expense'; // 'expense' | 'income'
 	let amount = '';
-	let category = '';           // selected category label
+	let categoryLabel = ''; // what we show in the button
+	let categoryId = null; // what we will send to backend later
 	let date = '';
 	let description = '';
 
-	/* dropdown state + options */
+	/* dropdown state + options from API */
 	let showCategoryMenu = false;
-	const categories = ['Groceries', 'Transportation', 'Utilities', 'Entertainment'];
+	let categories = []; // [{ id, name, income }, ...]
+	let categoriesError = '';
 
-	onMount(() => {
+	onMount(async () => {
 		// default date = today (yyyy-mm-dd)
 		const d = new Date();
 		const yyyy = d.getFullYear();
 		const mm = String(d.getMonth() + 1).padStart(2, '0');
 		const dd = String(d.getDate()).padStart(2, '0');
 		date = `${yyyy}-${mm}-${dd}`;
+
+		// load initial categories for default type ("expense" => outcome)
+		await loadCategories(type);
 	});
 
-	function selectType(next) { type = next; }
+	async function loadCategories(currentType) {
+		categoriesError = '';
+
+		try {
+			// backend: /api/categories/income or /api/categories/outcome
+			const suffix = currentType === 'income' ? '/categories/income' : '/categories/outcome';
+			const res = await fetch(`${API_BASE}${suffix}`);
+
+			if (!res.ok) {
+				console.error('Failed to load categories', res.status);
+				categoriesError = 'Failed to load categories.';
+				categories = [];
+				return;
+			}
+
+			const data = await res.json();
+			categories = Array.isArray(data) ? data : [];
+		} catch (err) {
+			console.error('Error loading categories', err);
+			categoriesError = 'Error loading categories.';
+			categories = [];
+		}
+
+		// reset selection whenever we reload categories
+		categoryLabel = '';
+		categoryId = null;
+	}
+
+	function selectType(next) {
+		type = next;
+		loadCategories(next);
+	}
 
 	function chooseCategory(c) {
-		category = c;
+		categoryLabel = c.name;
+		categoryId = c.id; // CategoryDTO has "id"
 		showCategoryMenu = false;
 	}
 
 	function submit(e) {
 		e.preventDefault();
-		// UI-only preview
-		console.log('Preview payload:', { type, amount, category, date, description });
+		console.log('Preview payload:', {
+			type,
+			amount,
+			categoryId,
+			categoryLabel,
+			date,
+			description
+		});
 	}
 </script>
 
@@ -108,7 +155,6 @@
 						showCategoryMenu = !showCategoryMenu;
 					}}
 					on:keydown={(e) => {
-						// make toggle keyboard friendly
 						if (e.key === 'Enter' || e.key === ' ') {
 							e.preventDefault();
 							showCategoryMenu = !showCategoryMenu;
@@ -118,33 +164,63 @@
 						}
 					}}
 				>
-					<span>{category || 'Select a category'}</span>
+					<span>{categoryLabel || 'Select a category'}</span>
 					<span class="chev" aria-hidden="true">▾</span>
 				</button>
 
 				{#if showCategoryMenu}
-					<ul id="category-panel" class="menu-panel wide" role="listbox" aria-labelledby="category">
-						{#each categories as c, i}
+					<ul
+						id="category-panel"
+						class="menu-panel wide"
+						role="listbox"
+						aria-labelledby="category"
+					>
+						{#if categoriesError}
 							<li>
 								<button
 									type="button"
 									class="menu-item"
-									role="option"
-									aria-selected={category === c}
-									on:click={(e) => {
-										e.stopPropagation();
-										chooseCategory(c);
-									}}
-									on:keydown={(e) => {
-										// Enter/Space handled by button natively; allow Esc to close
-										if (e.key === 'Escape') { showCategoryMenu = false; }
-									}}
+									aria-disabled="true"
 								>
-									<span>{c}</span>
-									{#if category === c}<span class="check">✓</span>{/if}
+									{categoriesError}
 								</button>
 							</li>
-						{/each}
+						{:else if categories.length === 0}
+							<li>
+								<button
+									type="button"
+									class="menu-item"
+									aria-disabled="true"
+								>
+									No categories available
+								</button>
+							</li>
+						{:else}
+							{#each categories as c}
+								<li>
+									<button
+										type="button"
+										class="menu-item"
+										role="option"
+										aria-selected={categoryId === c.id}
+										on:click={(e) => {
+											e.stopPropagation();
+											chooseCategory(c);
+										}}
+										on:keydown={(e) => {
+											if (e.key === 'Escape') {
+												showCategoryMenu = false;
+											}
+										}}
+									>
+										<span>{c.name}</span>
+										{#if categoryId === c.id}
+											<span class="check">✓</span>
+										{/if}
+									</button>
+								</li>
+							{/each}
+						{/if}
 					</ul>
 				{/if}
 			</div>

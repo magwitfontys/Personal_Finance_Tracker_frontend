@@ -1,14 +1,7 @@
 {
-	"compilerOptions": {
-		"target": "ES2020",
-		"module": "ESNext",
-		"moduleResolution": "Bundler",
-		"types": ["node", "svelte"],
-		"strict": true,
-		"esModuleInterop": true,
-		"skipLibCheck": true,
-		"noEmit": true,
-		"checkJs": false
-	},
-	"include": ["src", "vite.config.js", "svelte.config.js", "eslint.config.js"]
+  "extends": "./.svelte-kit/tsconfig.json",
+  "compilerOptions": {
+    "strict": true
+  },
+  "include": ["src"]
 }

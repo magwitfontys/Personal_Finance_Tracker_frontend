@@ -1,26 +1,22 @@
-# syntax=docker/dockerfile:1
-
-# ---- Build stage ----
 FROM node:20-alpine AS build
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci
+# install deps
+COPY front-end/package*.json ./
+RUN npm install
 
-COPY . .
-# Builds SvelteKit (adapter-auto will choose node on CI)
+# copy source
+COPY front-end/ .
+
+# set API base for client bundle; nginx proxies /api to the backend
+ARG PUBLIC_API_BASE=/api
+ENV PUBLIC_API_BASE=${PUBLIC_API_BASE}
+
+# build with Vite (SvelteKit plugin + adapter-static will output to /app/build)
 RUN npm run build
 
-# ---- Run stage ----
-FROM node:20-alpine
-WORKDIR /app
-ENV NODE_ENV=production
-ENV PORT=3000
-
-# Keep node_modules to satisfy any runtime requires from the built server
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/build ./build
-COPY package*.json ./
-
-EXPOSE 3000
-CMD ["node", "build"]
+FROM nginx:alpine
+COPY --from=build /app/build /usr/share/nginx/html
+COPY front-end/nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx","-g","daemon off;"]
