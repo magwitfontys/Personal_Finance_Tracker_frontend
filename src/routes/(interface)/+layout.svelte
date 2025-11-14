@@ -13,6 +13,7 @@
 	import addIcon from '$lib/pictures/add.png';
 	import listIcon from '$lib/pictures/list.png';
 	import exitIcon from '$lib/pictures/exit.png';
+  	import '../../app.css';
 
 	// active link flags
 	$: path = $page.url.pathname;

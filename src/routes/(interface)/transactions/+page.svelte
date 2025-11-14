@@ -34,11 +34,11 @@
 
 	/* search + filters */
 	let q = '';
-	let typeFilter = 'income'; // 'all' | 'income' | 'expense'
+	let typeFilter = 'all'; // 'all' | 'income' | 'expense'
 	let categoryFilter = 'all'; // 'all' | category name
 
 	/* dropdown menu state */
-	let showTypeMenu = false;
+	let showTypeMenu = false;	
 	let showCategoryMenu = false;
 
 	/* categories from API */
