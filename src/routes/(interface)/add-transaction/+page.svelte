@@ -1,5 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 	import { PUBLIC_API_BASE } from '$env/static/public';
 	import '$lib/styles/add-transaction.css';
 
@@ -177,26 +178,18 @@
 					>
 						{#if categoriesError}
 							<li>
-								<button
-									type="button"
-									class="menu-item"
-									aria-disabled="true"
-								>
+								<button type="button" class="menu-item" aria-disabled="true">
 									{categoriesError}
 								</button>
 							</li>
 						{:else if categories.length === 0}
 							<li>
-								<button
-									type="button"
-									class="menu-item"
-									aria-disabled="true"
-								>
+								<button type="button" class="menu-item" aria-disabled="true">
 									No categories available
 								</button>
 							</li>
 						{:else}
-							{#each categories as c}
+							{#each categories as c (c.id)}
 								<li>
 									<button
 										type="button"

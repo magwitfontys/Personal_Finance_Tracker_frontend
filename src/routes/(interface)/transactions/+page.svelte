@@ -2,6 +2,7 @@
 	import '$lib/styles/transactions.css';
 	import { onMount } from 'svelte';
 	import { PUBLIC_API_BASE } from '$env/static/public';
+	import { SvelteMap } from 'svelte/reactivity';
 
 	/* icons */
 	import searchIcon from '$lib/pictures/search.png';
@@ -38,7 +39,7 @@
 	let categoryFilter = 'all'; // 'all' | category name
 
 	/* dropdown menu state */
-	let showTypeMenu = false;	
+	let showTypeMenu = false;
 	let showCategoryMenu = false;
 
 	/* categories from API */
@@ -80,8 +81,8 @@
 				}
 			}
 
-			// dedupe by id
-			const map = new Map();
+			// dedupe by id using SvelteMap (for svelte/prefer-svelte-reactivity)
+			const map = new SvelteMap();
 			for (const c of all) {
 				if (!map.has(c.id)) {
 					map.set(c.id, c);
@@ -120,7 +121,7 @@
 	}
 
 	function edit(id) {
-		// placeholder – later we’ll navigate to edit page / call API
+		// placeholder – later we will navigate to edit page / call API
 		console.log('edit request', id);
 	}
 
@@ -194,11 +195,7 @@
 				</button>
 
 				{#if showTypeMenu}
-					<ul
-						class="menu-panel"
-						role="listbox"
-						aria-label="Type filter"
-					>
+					<ul class="menu-panel" role="listbox" aria-label="Type filter">
 						<li>
 							<button
 								type="button"
@@ -208,7 +205,9 @@
 								on:click|stopPropagation={() => selectType('all')}
 							>
 								<span>All Types</span>
-								{#if typeFilter === 'all'}<span class="check">✓</span>{/if}
+								{#if typeFilter === 'all'}
+									<span class="check">✓</span>
+								{/if}
 							</button>
 						</li>
 						<li>
@@ -220,7 +219,9 @@
 								on:click|stopPropagation={() => selectType('income')}
 							>
 								<span>Income</span>
-								{#if typeFilter === 'income'}<span class="check">✓</span>{/if}
+								{#if typeFilter === 'income'}
+									<span class="check">✓</span>
+								{/if}
 							</button>
 						</li>
 						<li>
@@ -232,7 +233,9 @@
 								on:click|stopPropagation={() => selectType('expense')}
 							>
 								<span>Expense</span>
-								{#if typeFilter === 'expense'}<span class="check">✓</span>{/if}
+								{#if typeFilter === 'expense'}
+									<span class="check">✓</span>
+								{/if}
 							</button>
 						</li>
 					</ul>
@@ -263,11 +266,7 @@
 				</button>
 
 				{#if showCategoryMenu}
-					<ul
-						class="menu-panel wide"
-						role="listbox"
-						aria-label="Category filter"
-					>
+					<ul class="menu-panel wide" role="listbox" aria-label="Category filter">
 						{#if categoriesError}
 							<li>
 								<button
@@ -307,7 +306,7 @@
 									</button>
 								</li>
 							{:else}
-								{#each categories as c}
+								{#each categories as c (c.id)}
 									<li>
 										<button
 											type="button"

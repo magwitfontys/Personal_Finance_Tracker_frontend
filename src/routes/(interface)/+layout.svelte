@@ -3,17 +3,18 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
+	import { resolve } from '$app/paths';
 
 	// styles + icons
 	import '$lib/styles/app-nav.css';
 	import walletIcon from '$lib/pictures/white-wallet.png';
 
-	// single (dark) variants — we'll turn them white with CSS when active
+	// single (dark) variants; we turn them white with CSS when active
 	import dashboardIcon from '$lib/pictures/dashboard.png';
 	import addIcon from '$lib/pictures/add.png';
 	import listIcon from '$lib/pictures/list.png';
 	import exitIcon from '$lib/pictures/exit.png';
-  	import '../../app.css';
+	import '../../app.css';
 
 	// active link flags
 	$: path = $page.url.pathname;
@@ -23,7 +24,9 @@
 
 	// hydrate auth from localStorage so header shows after refresh
 	onMount(() => {
-		if (!browser) return;
+		if (!browser) {
+			return;
+		}
 
 		const raw = localStorage.getItem('auth');
 		if (raw) {
@@ -33,11 +36,16 @@
 					auth.set({ username: parsed?.username ?? null, token: parsed?.token ?? null });
 					return;
 				}
-			} catch {}
+			} catch (error) {
+				// ignore JSON parse errors and fall back to token/username keys
+			}
 		}
+
 		const token = localStorage.getItem('token');
 		const username = localStorage.getItem('username');
-		if (token || username) auth.set({ token: token ?? null, username: username ?? null });
+		if (token || username) {
+			auth.set({ token: token ?? null, username: username ?? null });
+		}
 	});
 
 	function logout() {
@@ -46,7 +54,7 @@
 			localStorage.removeItem('token');
 			localStorage.removeItem('auth');
 			localStorage.removeItem('username');
-			window.location.href = '/auth';
+			window.location.href = resolve('/auth');
 		}
 	}
 </script>
@@ -55,7 +63,7 @@
 <nav class="app-nav" aria-label="Main">
 	<div class="nav-inner">
 		<!-- Brand -->
-		<a href="/dashboard" class="brand">
+		<a href={resolve('/dashboard')} class="brand">
 			<span class="icon--brand" aria-hidden="true">
 				<img src={walletIcon} alt="" class="icon-img" />
 			</span>
@@ -65,30 +73,36 @@
 		<!-- Center links -->
 		<ul class="nav-links" role="list">
 			<li>
-				<a href="/dashboard"
-				   class="nav-link"
-				   class:is-active={isDashboard}
-				   aria-current={isDashboard ? 'page' : undefined}>
+				<a
+					href={resolve('/dashboard')}
+					class="nav-link"
+					class:is-active={isDashboard}
+					aria-current={isDashboard ? 'page' : undefined}
+				>
 					<img class="nav-icon" alt="" src={dashboardIcon} />
 					<span>Dashboard</span>
 				</a>
 			</li>
 
 			<li>
-				<a href="/add-transaction"
-				   class="nav-link"
-				   class:is-active={isAdd}
-				   aria-current={isAdd ? 'page' : undefined}>
+				<a
+					href={resolve('/add-transaction')}
+					class="nav-link"
+					class:is-active={isAdd}
+					aria-current={isAdd ? 'page' : undefined}
+				>
 					<img class="nav-icon" alt="" src={addIcon} />
 					<span>Add Transaction</span>
 				</a>
 			</li>
 
 			<li>
-				<a href="/transactions"
-				   class="nav-link"
-				   class:is-active={isTransactions}
-				   aria-current={isTransactions ? 'page' : undefined}>
+				<a
+					href={resolve('/transactions')}
+					class="nav-link"
+					class:is-active={isTransactions}
+					aria-current={isTransactions ? 'page' : undefined}
+				>
 					<img class="nav-icon" alt="" src={listIcon} />
 					<span>Transactions</span>
 				</a>

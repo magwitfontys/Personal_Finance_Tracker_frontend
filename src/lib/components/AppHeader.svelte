@@ -2,6 +2,7 @@
 	import { auth } from '$lib/stores/authStore';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
+	import { resolve } from '$app/paths';
 
 	// bring in the CSS from a separate file
 	import '$lib/styles/app-nav.css';
@@ -24,8 +25,8 @@
 <header class="app-nav">
 	<div class="nav-inner">
 		<!-- Brand (left) -->
-		<a href="/dashboard" class="brand">
-			<!-- emoji placeholder – swap for your icon later -->
+		<a href={resolve('/dashboard')} class="brand">
+			<!-- emoji placeholder - swap for your icon later -->
 			<span class="icon icon--brand" aria-hidden="true">💼</span>
 			<span class="brand-text">Finance Tracker</span>
 		</a>
@@ -33,25 +34,31 @@
 		<!-- Center links -->
 		<nav class="nav-links" aria-label="Primary">
 			<a
-				href="/dashboard"
+				href={resolve('/dashboard')}
 				class="nav-link"
 				data-active={path === '/dashboard'}
 				aria-current={path === '/dashboard' ? 'page' : undefined}
-			>Dashboard</a>
+			>
+				Dashboard
+			</a>
 
 			<a
-				href="/add-transaction"
+				href={resolve('/add-transaction')}
 				class="nav-link"
 				data-active={path.startsWith('/add-transaction')}
 				aria-current={path.startsWith('/add-transaction') ? 'page' : undefined}
-			>Add Transaction</a>
+			>
+				Add Transaction
+			</a>
 
 			<a
-				href="/transactions"
+				href={resolve('/transactions')}
 				class="nav-link"
 				data-active={path.startsWith('/transactions')}
 				aria-current={path.startsWith('/transactions') ? 'page' : undefined}
-			>Transactions</a>
+			>
+				Transactions
+			</a>
 		</nav>
 
 		<!-- Right side actions -->

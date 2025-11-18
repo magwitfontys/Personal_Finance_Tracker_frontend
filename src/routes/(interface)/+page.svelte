@@ -3,7 +3,9 @@
 	import { browser } from '$app/environment';
 
 	function readAuthFromLocalStorage() {
-		if (!browser) return null;
+		if (!browser) {
+			return null;
+		}
 
 		const raw = localStorage.getItem('auth');
 		if (raw) {
@@ -12,20 +14,29 @@
 				if (parsed && typeof parsed === 'object' && (parsed.token || parsed.username)) {
 					return { token: parsed.token ?? null, username: parsed.username ?? null };
 				}
-			} catch {}
+			} catch (error) {
+				// ignore invalid JSON and fall back to token/username keys
+			}
 		}
 
 		const token = localStorage.getItem('token');
 		const username = localStorage.getItem('username');
-		if (token || username) return { token: token ?? null, username: username ?? null };
+		if (token || username) {
+			return { token: token ?? null, username: username ?? null };
+		}
 
-		if (localStorage.getItem('auth') === '1') return { token: '1', username: null };
+		if (localStorage.getItem('auth') === '1') {
+			return { token: '1', username: null };
+		}
 
 		return null;
 	}
 
 	onMount(() => {
-		if (!browser) return;
+		if (!browser) {
+			return;
+		}
+
 		const a = readAuthFromLocalStorage();
 		if (a) {
 			window.location.replace('/dashboard');
