@@ -1,6 +1,5 @@
 <script>
 	import { onMount } from 'svelte';
-	import { browser } from '$app/environment';
 	import { PUBLIC_API_BASE } from '$env/static/public';
 	import '$lib/styles/add-transaction.css';
 

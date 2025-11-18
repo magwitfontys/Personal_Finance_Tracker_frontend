@@ -14,7 +14,7 @@
 				if (parsed && typeof parsed === 'object' && (parsed.token || parsed.username)) {
 					return { token: parsed.token ?? null, username: parsed.username ?? null };
 				}
-			} catch (error) {
+			} catch {
 				// ignore invalid JSON and fall back to token/username keys
 			}
 		}

@@ -36,7 +36,7 @@
 					auth.set({ username: parsed?.username ?? null, token: parsed?.token ?? null });
 					return;
 				}
-			} catch (error) {
+			} catch {
 				// ignore JSON parse errors and fall back to token/username keys
 			}
 		}
