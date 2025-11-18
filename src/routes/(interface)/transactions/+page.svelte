@@ -1,7 +1,7 @@
 <script>
 	import '$lib/styles/transactions.css';
 	import { onMount } from 'svelte';
-	import { PUBLIC_API_BASE } from '$env/static/public';
+	import { env } from '$env/dynamic/public';
 	import { SvelteMap } from 'svelte/reactivity';
 
 	/* icons */
@@ -11,7 +11,7 @@
 	import trashIcon from '$lib/pictures/trash.png';
 
 	// Base for API calls
-	const API_BASE = (PUBLIC_API_BASE || '/api').replace(/\/$/, '');
+	const API_BASE = (env.PUBLIC_API_BASE || '/api').replace(/\/$/, '');
 
 	/* temporary mock data */
 	let transactions = [
@@ -121,7 +121,7 @@
 	}
 
 	function edit(id) {
-		// placeholder – later we will navigate to edit page / call API
+		// placeholder, later call API / navigate to edit page
 		console.log('edit request', id);
 	}
 

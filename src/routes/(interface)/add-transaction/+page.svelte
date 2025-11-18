@@ -1,13 +1,13 @@
 <script>
 	import { onMount } from 'svelte';
-	import { PUBLIC_API_BASE } from '$env/static/public';
+	import { env } from '$env/dynamic/public';
 	import '$lib/styles/add-transaction.css';
 
 	/* icons (button only) */
 	import addIcon from '$lib/pictures/white-add.png';
 
-	// Base for API calls
-	const API_BASE = (PUBLIC_API_BASE || '/api').replace(/\/$/, '');
+	// Base for API calls (fallback to /api when env is not set)
+	const API_BASE = (env.PUBLIC_API_BASE || '/api').replace(/\/$/, '');
 
 	/* local UI state */
 	let type = 'expense'; // 'expense' | 'income'
