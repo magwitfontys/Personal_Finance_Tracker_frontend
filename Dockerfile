@@ -8,8 +8,8 @@ FROM node:20-alpine AS build
 # Work in app root (this is where package.json lives)
 WORKDIR /app
 
-# Install dependencies
-COPY package*.json ./
+# Install dependencies (without package-lock.json, to avoid npm + rollup bug)
+COPY package.json ./
 RUN npm install
 
 # Copy the rest of the sources and build
