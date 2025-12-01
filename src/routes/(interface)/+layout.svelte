@@ -13,6 +13,7 @@
 	import dashboardIcon from '$lib/pictures/dashboard.png';
 	import addIcon from '$lib/pictures/add.png';
 	import listIcon from '$lib/pictures/list.png';
+	import globeIcon from '$lib/pictures/globe.png';
 	import exitIcon from '$lib/pictures/exit.png';
 	import '../../app.css';
 
@@ -21,6 +22,7 @@
 	$: isDashboard = path.startsWith('/dashboard');
 	$: isAdd = path.startsWith('/add-transaction');
 	$: isTransactions = path.startsWith('/transactions');
+	$: isPrivacy = path.startsWith('/privacy');
 
 	// hydrate auth from localStorage so header shows after refresh
 	onMount(() => {
@@ -105,6 +107,18 @@
 				>
 					<img class="nav-icon" alt="" src={listIcon} />
 					<span>Transactions</span>
+				</a>
+			</li>
+
+			<li>
+				<a
+					href={resolve('/privacy')}
+					class="nav-link"
+					class:is-active={isPrivacy}
+					aria-current={isPrivacy ? 'page' : undefined}
+				>
+					<img class="nav-icon" alt="" src={globeIcon} />
+					<span>Privacy</span>
 				</a>
 			</li>
 		</ul>
