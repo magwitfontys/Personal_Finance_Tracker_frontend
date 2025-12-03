@@ -103,9 +103,12 @@
 			return;
 		}
 
+		// Get userId from localStorage (set during login)
+		const userId = parseInt(localStorage.getItem('userId') || '1', 10);
+
 		// Build payload matching backend TransactionDTO
 		const payload = {
-			userId: 1, // TODO: Get from auth store when implemented
+			userId: userId,
 			categoryId: categoryId,
 			amount: parseFloat(amount),
 			txnType: type.toUpperCase(), // "expense" -> "EXPENSE" or "income" -> "INCOME"

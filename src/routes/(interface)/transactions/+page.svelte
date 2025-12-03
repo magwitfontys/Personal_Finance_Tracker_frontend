@@ -52,7 +52,8 @@
 		transactionsError = '';
 
 		try {
-			const userId = 1; // TODO: Get from auth store when implemented
+			// Get userId from localStorage (set during login)
+			const userId = localStorage.getItem('userId') || '1';
 			const res = await fetch(`${API_BASE}/transactions?userId=${userId}`);
 
 			if (!res.ok) {
