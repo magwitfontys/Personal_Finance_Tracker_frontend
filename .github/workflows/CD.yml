@@ -1,7 +1,13 @@
-name: CD (frontend, manual)
+name: CD (frontend, auto on main + manual)
 
 on:
+  # allow manual trigger from the Actions tab
   workflow_dispatch: {}
+
+  # automatically run on every push to main (including merges)
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
