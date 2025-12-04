@@ -467,9 +467,11 @@
 		<div
 			class="modal-content"
 			on:click={(e) => e.stopPropagation()}
+			on:keydown={(e) => e.key === 'Escape' && (showDeleteModal = false)}
 			role="dialog"
 			aria-labelledby="modal-title"
 			aria-modal="true"
+			tabindex="-1"
 		>
 			<h3 id="modal-title">Are you sure?</h3>
 			<p>This action cannot be undone. This will permanently delete the transaction.</p>

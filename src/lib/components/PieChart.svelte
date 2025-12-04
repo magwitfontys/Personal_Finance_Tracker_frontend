@@ -83,7 +83,7 @@
 		<canvas bind:this={canvas}></canvas>
 	</div>
 	<div class="legend">
-		{#each labels as label, i}
+		{#each labels as label, i (i)}
 			{@const total = data.reduce((a, b) => a + b, 0)}
 			{@const percentage = Math.round((data[i] / total) * 100)}
 			<div class="legend-item" style="color: {getLegendColor(i)}">
