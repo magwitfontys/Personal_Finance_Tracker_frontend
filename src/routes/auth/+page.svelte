@@ -74,12 +74,15 @@
 
 			// Store token if provided, fallback to simple auth flag
 			if (browser) {
-				if (data.token) localStorage.setItem('token', data.token);
-				if (data.success === true || data.token) {
-					localStorage.setItem('auth', '1');
-					localStorage.setItem('username', login.username);
-					// standard navigation to avoid goto() check
-					window.location.href = '/dashboard';
+			if (data.token) localStorage.setItem('token', data.token);
+			if (data.success === true || data.token) {
+				localStorage.setItem('auth', '1');
+				localStorage.setItem('username', login.username);
+				// Store userId if provided, otherwise use 1 as default
+				const userId = data.userId || data.user_id || 1;
+				localStorage.setItem('userId', userId.toString());
+				// standard navigation to avoid goto() check
+				window.location.href = '/dashboard';
 				} else {
 					login.error = 'Login failed.';
 				}

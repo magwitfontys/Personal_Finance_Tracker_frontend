@@ -22,6 +22,12 @@
 	let categories = []; // [{ id, name, income }, ...]
 	let categoriesError = '';
 
+	/* toast notification */
+	let showToast = false;
+	let toastMessage = '';
+	let toastType = 'success'; // 'success' | 'error'
+	let toastTimeout = null;
+
 	onMount(async () => {
 		// default date = today (yyyy-mm-dd)
 		const d = new Date();
@@ -73,16 +79,72 @@
 		showCategoryMenu = false;
 	}
 
-	function submit(e) {
+	function showToastNotification(message, type = 'success', duration = 4000) {
+		if (toastTimeout) clearTimeout(toastTimeout);
+		toastMessage = message;
+		toastType = type;
+		showToast = true;
+		toastTimeout = setTimeout(() => {
+			showToast = false;
+		}, duration);
+	}
+
+	function closeToast() {
+		if (toastTimeout) clearTimeout(toastTimeout);
+		showToast = false;
+	}
+
+	async function submit(e) {
 		e.preventDefault();
-		console.log('Preview payload:', {
-			type,
-			amount,
-			categoryId,
-			categoryLabel,
-			date,
-			description
-		});
+		
+		// Basic validation
+		if (!amount || !categoryId || !date) {
+			showToastNotification('Please fill in all required fields', 'error');
+			return;
+		}
+
+		// Get userId from localStorage (set during login)
+		const userId = parseInt(localStorage.getItem('userId') || '1', 10);
+
+		// Build payload matching backend TransactionDTO
+		const payload = {
+			userId: userId,
+			categoryId: categoryId,
+			amount: parseFloat(amount),
+			txnType: type.toUpperCase(), // "expense" -> "EXPENSE" or "income" -> "INCOME"
+			txnDate: date,
+			description: description || null
+		};
+
+		try {
+			const res = await fetch(`${API_BASE}/transactions`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(payload)
+			});
+
+			if (!res.ok) {
+				const errorData = await res.json();
+				throw new Error(errorData.error || 'Failed to create transaction');
+			}
+
+			const created = await res.json();
+			console.log('Transaction created:', created);
+
+			// Reset form
+			amount = '';
+			categoryLabel = '';
+			categoryId = null;
+			description = '';
+			// Keep type and date as is
+
+			showToastNotification('Transaction added successfully!', 'success');
+		} catch (err) {
+			console.error('Error creating transaction:', err);
+			showToastNotification('Failed to add transaction: ' + err.message, 'error');
+		}
 	}
 </script>
 
@@ -245,3 +307,79 @@
 		</div>
 	</form>
 </section>
+
+<!-- Toast Notification -->
+{#if showToast}
+	<div class="toast {toastType}">
+		<span class="toast-message">{toastMessage}</span>
+		<button class="toast-close" on:click={closeToast} aria-label="Close notification">×</button>
+	</div>
+{/if}
+
+<style>
+	.toast {
+		position: fixed !important;
+		bottom: 24px !important;
+		right: 24px !important;
+		background: white;
+		border-radius: 12px;
+		padding: 16px 20px;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		min-width: 300px;
+		max-width: 400px;
+		z-index: 9999 !important;
+		animation: slideIn 0.3s ease-out;
+		border-left: 4px solid;
+	}
+
+	@keyframes slideIn {
+		from {
+			transform: translateX(400px);
+			opacity: 0;
+		}
+		to {
+			transform: translateX(0);
+			opacity: 1;
+		}
+	}
+
+	.toast.success {
+		border-left-color: #10b981;
+	}
+
+	.toast.error {
+		border-left-color: #ef4444;
+	}
+
+	.toast-message {
+		flex: 1;
+		color: #1a202c;
+		font-weight: 500;
+		font-size: 0.95rem;
+	}
+
+	.toast-close {
+		background: none;
+		border: none;
+		font-size: 1.5rem;
+		color: #718096;
+		cursor: pointer;
+		padding: 0;
+		width: 24px;
+		height: 24px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 4px;
+		transition: all 0.2s;
+		line-height: 1;
+	}
+
+	.toast-close:hover {
+		background: #f7fafc;
+		color: #2d3748;
+	}
+</style>
