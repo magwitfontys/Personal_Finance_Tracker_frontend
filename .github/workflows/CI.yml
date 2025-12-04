@@ -2,6 +2,9 @@ name: CI (frontend)
 
 on:
   push:
+    branches:
+      - main
+      - development   # change to dev if your branch is called dev
   pull_request:
   workflow_dispatch:
 
@@ -22,7 +25,7 @@ jobs:
       - name: Install deps
         run: npm ci
 
-      # NEW: format in CI so the next step's check passes
+      # format in CI so the next step's check passes
       - name: Format with Prettier
         run: npx prettier --write .
 
