@@ -143,7 +143,22 @@
 			showToastNotification('Transaction added successfully!', 'success');
 		} catch (err) {
 			console.error('Error creating transaction:', err);
-			showToastNotification('Failed to add transaction: ' + err.message, 'error');
+
+			// If the backend rejects due to unknown user_id (FK), auto-clear stale session and redirect to login
+			const msg = (err && err.message) || '';
+			const fkError = msg.toLowerCase().includes('foreign key') || msg.toLowerCase().includes('fk_tx_user');
+			if (fkError) {
+				localStorage.removeItem('userId');
+				localStorage.removeItem('auth');
+				localStorage.removeItem('username');
+				showToastNotification('Session refreshed. Please log in again.', 'error', 3000);
+				setTimeout(() => {
+					window.location.href = '/auth';
+				}, 1200);
+				return;
+			}
+
+			showToastNotification('Failed to add transaction: ' + msg, 'error');
 		}
 	}
 </script>

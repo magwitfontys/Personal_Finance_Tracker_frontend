@@ -35,6 +35,18 @@
 	let showDeleteModal = false;
 	let transactionToDelete = null;
 
+	/* edit transaction modal */
+	let showEditModal = false;
+	let editError = '';
+	let editForm = {
+		id: null,
+		type: 'expense',
+		amount: 0,
+		categoryId: null,
+		date: '',
+		description: ''
+	};
+
 	/* toast notification */
 	let showToast = false;
 	let toastMessage = '';
@@ -152,6 +164,11 @@
 		return true;
 	});
 
+	// categories available for the current edit selection
+	$: editCategoryOptions = categories.filter((c) =>
+		editForm.type === 'income' ? c.income : !c.income
+	);
+
 	function showToastNotification(message, type = 'success', duration = 4000) {
 		if (toastTimeout) clearTimeout(toastTimeout);
 		toastMessage = message;
@@ -170,6 +187,11 @@
 	function promptDelete(transaction) {
 		transactionToDelete = transaction;
 		showDeleteModal = true;
+	}
+
+	function findCategoryIdByName(name, type) {
+		const target = categories.find((c) => c.name === name && ((type === 'income' && c.income) || (type === 'expense' && !c.income)));
+		return target ? target.id : null;
 	}
 
 	function cancelDelete() {
@@ -201,8 +223,75 @@
 	}
 
 	function edit(id) {
-		// placeholder, later call API / navigate to edit page
-		console.log('edit request', id);
+		const tx = transactions.find((t) => t.id === id);
+		if (!tx) return;
+
+		editError = '';
+		const categoryId = findCategoryIdByName(tx.category, tx.type);
+		const fallbackCategoryId = categoryId ?? editCategoryOptions.find((c) => (tx.type === 'income' ? c.income : !c.income))?.id ?? null;
+		editForm = {
+			id: tx.id,
+			type: tx.type,
+			amount: Math.abs(tx.amount),
+			categoryId: fallbackCategoryId,
+			date: tx.date,
+			description: tx.title === 'No description' ? '' : tx.title
+		};
+		showEditModal = true;
+	}
+
+	function closeEditModal() {
+		showEditModal = false;
+		editError = '';
+	}
+
+	async function submitEdit(event) {
+		event.preventDefault();
+		if (!editForm.id) return;
+
+		try {
+			const userId = localStorage.getItem('userId') || '1';
+			const payload = {
+				transactionId: editForm.id,
+				userId: parseInt(userId, 10),
+				categoryId: editForm.categoryId,
+				amount: Number(editForm.amount),
+				txnType: editForm.type.toUpperCase(),
+				txnDate: editForm.date,
+				description: editForm.description?.trim() || ''
+			};
+
+			const res = await fetch(`${API_BASE}/transactions/${editForm.id}`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(payload)
+			});
+
+			if (!res.ok) {
+				throw new Error('Failed to update transaction');
+			}
+
+			// update local state
+			transactions = transactions.map((t) =>
+				t.id === editForm.id
+					? {
+						...t,
+						type: editForm.type,
+						category: categories.find((c) => c.id === editForm.categoryId)?.name || t.category,
+						date: editForm.date,
+						amount: editForm.type === 'income' ? Number(editForm.amount) : -Math.abs(Number(editForm.amount)),
+						title: editForm.description || 'No description'
+					}
+					: t
+			);
+
+			showToastNotification('Transaction updated successfully', 'success');
+			showEditModal = false;
+		} catch (err) {
+			console.error('Error updating transaction:', err);
+			editError = 'Failed to update transaction. Please try again.';
+			showToastNotification('Failed to update transaction', 'error');
+		}
 	}
 
 	function closeMenus() {
@@ -483,6 +572,114 @@
 	</div>
 {/if}
 
+<!-- Edit Transaction Modal -->
+{#if showEditModal}
+	<div class="modal-overlay" role="presentation" on:click={closeEditModal}>
+		<div
+			class="edit-modal"
+			on:click={(e) => e.stopPropagation()}
+			on:keydown={(e) => e.key === 'Escape' && closeEditModal()}
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="edit-title"
+			tabindex="-1"
+		>
+			<header class="edit-modal__header">
+				<h2 id="edit-title">Edit Transaction</h2>
+				<button class="close-btn" type="button" aria-label="Close" on:click={closeEditModal}>×</button>
+			</header>
+			<form class="edit-modal__body" on:submit|preventDefault={submitEdit}>
+				{#if editError}
+					<div class="form-error">{editError}</div>
+				{/if}
+				<div class="form-section type-section">
+					<label class="section-label">Type</label>
+					<div class="type-toggle">
+						<label class="toggle-option expense">
+							<input
+								type="radio"
+								name="txn-type"
+								value="expense"
+								checked={editForm.type === 'expense'}
+								on:change={() => (editForm = { ...editForm, type: 'expense', categoryId: null })}
+							/>
+							<span>Expense</span>
+						</label>
+						<label class="toggle-option income">
+							<input
+								type="radio"
+								name="txn-type"
+								value="income"
+								checked={editForm.type === 'income'}
+								on:change={() => (editForm = { ...editForm, type: 'income', categoryId: null })}
+							/>
+							<span>Income</span>
+						</label>
+					</div>
+				</div>
+
+				<div class="form-section">
+					<label class="section-label" for="edit-amount">Amount</label>
+					<input
+						type="number"
+						min="0"
+						step="0.01"
+						class="text-input"
+						id="edit-amount"
+						bind:value={editForm.amount}
+						required
+					/>
+				</div>
+
+				<div class="form-section">
+					<label class="section-label" for="edit-category">Category</label>
+					<select
+						class="text-input"
+						id="edit-category"
+						bind:value={editForm.categoryId}
+						required
+					>
+						{#if !editCategoryOptions.length}
+							<option value="" disabled>Select type first</option>
+						{:else}
+							{#each editCategoryOptions as c (c.id)}
+								<option value={c.id}>{c.name}</option>
+							{/each}
+						{/if}
+					</select>
+				</div>
+
+				<div class="form-section">
+					<label class="section-label" for="edit-date">Date</label>
+					<input
+						type="date"
+						class="text-input"
+						id="edit-date"
+						bind:value={editForm.date}
+						required
+					/>
+				</div>
+
+				<div class="form-section">
+					<label class="section-label" for="edit-desc">Description (optional)</label>
+					<textarea
+						class="text-area"
+						rows="3"
+						id="edit-desc"
+						bind:value={editForm.description}
+						placeholder="Add a short note"
+					></textarea>
+				</div>
+
+				<button type="submit" class="primary-btn">
+					<span class="plus">＋</span>
+					Update Transaction
+				</button>
+			</form>
+		</div>
+	</div>
+{/if}
+
 <!-- Toast Notification -->
 {#if showToast}
 	<div class="toast {toastType}">
@@ -512,6 +709,138 @@
 		max-width: 400px;
 		width: 90%;
 		box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+	}
+
+	.edit-modal {
+		background: #fff;
+		border-radius: 16px;
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+		padding: 20px;
+		width: 90%;
+		max-width: 640px;
+		outline: none;
+	}
+
+	.edit-modal__header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 12px;
+	}
+
+	.edit-modal__header h2 {
+		margin: 0;
+		font-size: 1.4rem;
+		font-weight: 700;
+	}
+
+	.close-btn {
+		background: transparent;
+		border: none;
+		font-size: 1.5rem;
+		line-height: 1;
+		cursor: pointer;
+	}
+
+	.edit-modal__body {
+		background: #f8f8fb;
+		border-radius: 14px;
+		padding: 16px;
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	.form-section {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.type-section {
+		gap: 8px;
+	}
+
+	.section-label {
+		font-weight: 600;
+		color: #222;
+	}
+
+	.type-toggle {
+		display: flex;
+		gap: 16px;
+		align-items: center;
+		padding: 0;
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.type-toggle input {
+		margin: 0;
+		cursor: pointer;
+		accent-color: #05051a;
+	}
+
+	.toggle-option {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-weight: 600;
+		cursor: pointer;
+		margin: 0;
+	}
+
+	.toggle-option.expense span {
+		color: #c53030;
+	}
+
+	.toggle-option.income span {
+		color: #2f855a;
+	}
+
+	.text-input,
+	.text-area,
+	.edit-modal select {
+		width: 100%;
+		border: 1px solid #d9dbe0;
+		border-radius: 10px;
+		padding: 12px;
+		background: #f3f4f7;
+		font-size: 1rem;
+	}
+
+	.text-area {
+		resize: vertical;
+	}
+
+	.primary-btn {
+		margin-top: 4px;
+		width: 100%;
+		border: none;
+		border-radius: 12px;
+		background: #05051a;
+		color: #fff;
+		padding: 14px;
+		font-size: 1rem;
+		font-weight: 700;
+		cursor: pointer;
+		display: inline-flex;
+		justify-content: center;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.primary-btn .plus {
+		font-weight: 900;
+	}
+
+	.form-error {
+		background: #ffe5e5;
+		color: #b00020;
+		border: 1px solid #f5b7b7;
+		border-radius: 10px;
+		padding: 10px 12px;
+		font-weight: 600;
 	}
 
 	.modal-content h3 {
