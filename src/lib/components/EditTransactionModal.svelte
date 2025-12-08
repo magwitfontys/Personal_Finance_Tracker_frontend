@@ -130,25 +130,25 @@
 										</button>
 									</li>
 								{:else}
-									{#each editCategoryOptions as c (c.id)}
+									{#each editCategoryOptions as category (category.id)}
 										<li>
 											<button
 												type="button"
 												class="menu-item"
 												role="option"
-												aria-selected={editForm.categoryId === c.id}
-												on:click={(e) => {
-													e.stopPropagation();
-													chooseCategory(c);
+												aria-selected={editForm.categoryId === category.id}
+												on:click={(event) => {
+													event.stopPropagation();
+													chooseCategory(category);
 												}}
-												on:keydown={(e) => {
-													if (e.key === 'Escape') {
+												on:keydown={(event) => {
+													if (event.key === 'Escape') {
 														showCategoryMenu = false;
 													}
 												}}
 											>
-												<span>{c.name}</span>
-												{#if editForm.categoryId === c.id}
+												<span>{category.name}</span>
+												{#if editForm.categoryId === category.id}
 													<span class="check">✓</span>
 												{/if}
 											</button>
