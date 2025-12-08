@@ -11,6 +11,7 @@
 	import filterIcon from '$lib/pictures/filter.png';
 	import editIcon from '$lib/pictures/file-edit.png';
 	import trashIcon from '$lib/pictures/trash.png';
+	import trashRedIcon from '$lib/pictures/trash-red.png';
 	import warningIcon from '$lib/pictures/triangle-warning.png';
 
 	// Base for API calls
@@ -64,7 +65,7 @@
 
 	const fmt = new Intl.NumberFormat('en-US', {
 		style: 'currency',
-		currency: 'USD'
+		currency: 'EUR'
 	});
 
 	// load transactions from API
@@ -389,7 +390,7 @@
 				aria-label="Delete all transactions"
 				title="Delete all transactions"
 			>
-				<img class="icon" src={trashIcon} alt="" />
+				<img class="icon" src={trashRedIcon} alt="" />
 			</button>
 		</div>
 
