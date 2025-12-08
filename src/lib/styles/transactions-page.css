@@ -1,0 +1,250 @@
+.modal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.5);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+}
+
+.modal-content {
+	background: white;
+	border-radius: 12px;
+	padding: 24px;
+	max-width: 400px;
+	width: 90%;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content h3 {
+	margin: 0 0 12px 0;
+	font-size: 1.25rem;
+	font-weight: 600;
+	color: #1a202c;
+}
+
+.modal-content p {
+	margin: 0 0 24px 0;
+	color: #4a5568;
+	line-height: 1.5;
+}
+
+.modal-actions {
+	display: flex;
+	gap: 12px;
+	justify-content: flex-end;
+}
+
+.btn-cancel,
+.btn-delete {
+	padding: 10px 20px;
+	border-radius: 8px;
+	font-weight: 500;
+	cursor: pointer;
+	border: none;
+	transition: all 0.2s;
+}
+
+.btn-cancel {
+	background: #e2e8f0;
+	color: #2d3748;
+}
+
+.btn-cancel:hover {
+	background: #cbd5e0;
+}
+
+.btn-delete {
+	background: #000;
+	color: white;
+}
+
+.btn-delete:hover {
+	background: #2d3748;
+}
+
+.tx-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 16px;
+}
+
+.delete-all-icon-btn {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 8px;
+	transition: all 0.2s;
+	opacity: 0.7;
+}
+
+.delete-all-icon-btn:hover {
+	opacity: 1;
+	background: #fef2f2;
+	transform: scale(1.1);
+}
+
+.delete-all-icon-btn:active {
+	transform: scale(0.95);
+}
+
+.delete-all-icon-btn .icon {
+	width: 24px;
+	height: 24px;
+}
+
+.delete-all-modal {
+	max-width: 500px;
+}
+
+.delete-all-warning {
+	background: #fef2f2;
+	border-left: 4px solid #c53030;
+	border-radius: 8px;
+	padding: 12px;
+	margin-bottom: 16px;
+}
+
+.delete-all-warning p {
+	margin: 0 0 8px 0;
+	color: #742a2a;
+	font-size: 0.95rem;
+	line-height: 1.5;
+}
+
+.delete-all-warning p:last-child {
+	margin-bottom: 0;
+}
+
+.required-text {
+	background: #fff5f5;
+	border: 1px solid #e2a76f;
+	border-radius: 6px;
+	padding: 10px 12px;
+	font-family: 'Courier New', monospace;
+	font-size: 0.9rem;
+	font-weight: 600;
+	color: #742a2a;
+	margin-top: 8px;
+	word-break: break-word;
+}
+
+.delete-all-input {
+	width: 100%;
+	border: 2px solid #e2e8f0;
+	border-radius: 8px;
+	padding: 12px;
+	font-size: 0.95rem;
+	background: #f8f8fb;
+	margin-bottom: 16px;
+	transition: all 0.2s;
+}
+
+.delete-all-input:focus {
+	outline: none;
+	border-color: #c53030;
+	background: white;
+	box-shadow: 0 0 0 3px rgba(197, 48, 48, 0.1);
+}
+
+.delete-all-input:disabled {
+	background: #e2e8f0;
+	cursor: not-allowed;
+	opacity: 0.6;
+}
+
+.btn-delete-all {
+	padding: 10px 20px;
+	border-radius: 8px;
+	background: #c53030;
+	color: white;
+	font-weight: 600;
+	cursor: pointer;
+	border: none;
+	transition: all 0.2s;
+}
+
+.btn-delete-all:hover:not(:disabled) {
+	background: #9b2c2c;
+}
+
+.btn-delete-all:disabled {
+	background: #cbd5e0;
+	cursor: not-allowed;
+	opacity: 0.6;
+}
+
+.toast {
+	position: fixed !important;
+	bottom: 24px !important;
+	right: 24px !important;
+	background: white;
+	border-radius: 12px;
+	padding: 16px 20px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	min-width: 300px;
+	max-width: 400px;
+	z-index: 9999 !important;
+	animation: slideIn 0.3s ease-out;
+	border-left: 4px solid;
+}
+
+@keyframes slideIn {
+	from {
+		transform: translateX(400px);
+		opacity: 0;
+	}
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+
+.toast.success {
+	border-left-color: #10b981;
+}
+
+.toast.error {
+	border-left-color: #ef4444;
+}
+
+.toast-message {
+	flex: 1;
+	color: #1a202c;
+	font-weight: 500;
+	font-size: 0.95rem;
+}
+
+.toast-close {
+	background: none;
+	border: none;
+	font-size: 1.5rem;
+	color: #718096;
+	cursor: pointer;
+	padding: 0;
+	width: 24px;
+	height: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 4px;
+	transition: all 0.2s;
+	line-height: 1;
+}
+
+.toast-close:hover {
+	background: #f7fafc;
+	color: #2d3748;
+}

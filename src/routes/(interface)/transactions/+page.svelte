@@ -1,8 +1,10 @@
 <script>
 	import '$lib/styles/transactions.css';
+	import '$lib/styles/transactions-page.css';
 	import { onMount } from 'svelte';
 	import { env } from '$env/dynamic/public';
 	import { SvelteMap } from 'svelte/reactivity';
+	import EditTransactionModal from '$lib/components/EditTransactionModal.svelte';
 
 	/* icons */
 	import searchIcon from '$lib/pictures/search.png';
@@ -34,6 +36,12 @@
 	/* delete confirmation modal */
 	let showDeleteModal = false;
 	let transactionToDelete = null;
+
+	/* delete all transactions modal */
+	let showDeleteAllModal = false;
+	let deleteAllConfirmation = '';
+	let deleteAllError = '';
+	let isDeleting = false;
 
 	/* edit transaction modal */
 	let showEditModal = false;
@@ -222,6 +230,53 @@
 		}
 	}
 
+	function openDeleteAllModal() {
+		showDeleteAllModal = true;
+		deleteAllConfirmation = '';
+		deleteAllError = '';
+	}
+
+	function closeDeleteAllModal() {
+		showDeleteAllModal = false;
+		deleteAllConfirmation = '';
+		deleteAllError = '';
+	}
+
+	async function confirmDeleteAll() {
+		const requiredText = 'Yes I would like to delete all the transactions';
+
+		if (deleteAllConfirmation !== requiredText) {
+			deleteAllError = `Please type the exact text: "${requiredText}"`;
+			return;
+		}
+
+		isDeleting = true;
+		deleteAllError = '';
+
+		try {
+			const userId = localStorage.getItem('userId') || '1';
+			const res = await fetch(`${API_BASE}/transactions/delete-all?userId=${userId}`, {
+				method: 'DELETE'
+			});
+
+			if (!res.ok) {
+				throw new Error('Failed to delete all transactions');
+			}
+
+			// Clear all transactions from local state
+			transactions = [];
+			showDeleteAllModal = false;
+			deleteAllConfirmation = '';
+			showToastNotification('All transactions deleted successfully!', 'success');
+		} catch (err) {
+			console.error('Error deleting all transactions:', err);
+			deleteAllError = 'Failed to delete all transactions. Please try again.';
+			showToastNotification('Failed to delete all transactions', 'error');
+		} finally {
+			isDeleting = false;
+		}
+	}
+
 	function edit(id) {
 		const tx = transactions.find((t) => t.id === id);
 		if (!tx) return;
@@ -324,7 +379,18 @@
 
 <section class="tx-wrap">
 	<div class="tx-card">
-		<h2 class="tx-title">Recent Transactions</h2>
+		<div class="tx-header">
+			<h2 class="tx-title">Recent Transactions</h2>
+			<button
+				type="button"
+				class="delete-all-icon-btn"
+				on:click={openDeleteAllModal}
+				aria-label="Delete all transactions"
+				title="Delete all transactions"
+			>
+				<img class="icon" src={trashIcon} alt="" />
+			</button>
+		</div>
 
 		<!-- Toolbar -->
 		<div class="tx-toolbar">
@@ -573,109 +639,65 @@
 {/if}
 
 <!-- Edit Transaction Modal -->
-{#if showEditModal}
-	<div class="modal-overlay" role="presentation" on:click={closeEditModal}>
+<EditTransactionModal
+	isOpen={showEditModal}
+	bind:editForm
+	{editError}
+	{editCategoryOptions}
+	onClose={closeEditModal}
+	onSubmit={submitEdit}
+/>
+
+<!-- Delete All Transactions Modal -->
+{#if showDeleteAllModal}
+	<div class="modal-overlay" on:click={closeDeleteAllModal} role="presentation">
 		<div
-			class="edit-modal"
+			class="modal-content delete-all-modal"
 			on:click={(e) => e.stopPropagation()}
-			on:keydown={(e) => e.key === 'Escape' && closeEditModal()}
+			on:keydown={(e) => e.key === 'Escape' && closeDeleteAllModal()}
 			role="dialog"
+			aria-labelledby="delete-all-title"
 			aria-modal="true"
-			aria-labelledby="edit-title"
 			tabindex="-1"
 		>
-			<header class="edit-modal__header">
-				<h2 id="edit-title">Edit Transaction</h2>
-				<button class="close-btn" type="button" aria-label="Close" on:click={closeEditModal}>×</button>
-			</header>
-			<form class="edit-modal__body" on:submit|preventDefault={submitEdit}>
-				{#if editError}
-					<div class="form-error">{editError}</div>
-				{/if}
-				<div class="form-section type-section">
-					<label class="section-label">Type</label>
-					<div class="type-toggle">
-						<label class="toggle-option expense">
-							<input
-								type="radio"
-								name="txn-type"
-								value="expense"
-								checked={editForm.type === 'expense'}
-								on:change={() => (editForm = { ...editForm, type: 'expense', categoryId: null })}
-							/>
-							<span>Expense</span>
-						</label>
-						<label class="toggle-option income">
-							<input
-								type="radio"
-								name="txn-type"
-								value="income"
-								checked={editForm.type === 'income'}
-								on:change={() => (editForm = { ...editForm, type: 'income', categoryId: null })}
-							/>
-							<span>Income</span>
-						</label>
-					</div>
-				</div>
+			<h3 id="delete-all-title">⚠️ Delete All Transactions</h3>
+			<div class="delete-all-warning">
+				<p><strong>This action cannot be undone!</strong></p>
+				<p>You are about to permanently delete <strong>all</strong> of your transactions. This process is not reversible.</p>
+				<p style="margin-top: 16px;">If you are absolutely sure you want to delete all your transactions, please type the following text in the field below:</p>
+				<div class="required-text">Yes I would like to delete all the transactions</div>
+			</div>
 
-				<div class="form-section">
-					<label class="section-label" for="edit-amount">Amount</label>
-					<input
-						type="number"
-						min="0"
-						step="0.01"
-						class="text-input"
-						id="edit-amount"
-						bind:value={editForm.amount}
-						required
-					/>
-				</div>
+			{#if deleteAllError}
+				<div class="form-error">{deleteAllError}</div>
+			{/if}
 
-				<div class="form-section">
-					<label class="section-label" for="edit-category">Category</label>
-					<select
-						class="text-input"
-						id="edit-category"
-						bind:value={editForm.categoryId}
-						required
-					>
-						{#if !editCategoryOptions.length}
-							<option value="" disabled>Select type first</option>
-						{:else}
-							{#each editCategoryOptions as c (c.id)}
-								<option value={c.id}>{c.name}</option>
-							{/each}
-						{/if}
-					</select>
-				</div>
+			<input
+				type="text"
+				class="text-input delete-all-input"
+				placeholder="Type the confirmation text here..."
+				bind:value={deleteAllConfirmation}
+				disabled={isDeleting}
+			/>
 
-				<div class="form-section">
-					<label class="section-label" for="edit-date">Date</label>
-					<input
-						type="date"
-						class="text-input"
-						id="edit-date"
-						bind:value={editForm.date}
-						required
-					/>
-				</div>
-
-				<div class="form-section">
-					<label class="section-label" for="edit-desc">Description (optional)</label>
-					<textarea
-						class="text-area"
-						rows="3"
-						id="edit-desc"
-						bind:value={editForm.description}
-						placeholder="Add a short note"
-					></textarea>
-				</div>
-
-				<button type="submit" class="primary-btn">
-					<span class="plus">＋</span>
-					Update Transaction
+			<div class="modal-actions">
+				<button
+					type="button"
+					class="btn-cancel"
+					on:click={closeDeleteAllModal}
+					disabled={isDeleting}
+				>
+					Cancel
 				</button>
-			</form>
+				<button
+					type="button"
+					class="btn-delete-all"
+					on:click={confirmDeleteAll}
+					disabled={isDeleting || deleteAllConfirmation !== 'Yes I would like to delete all the transactions'}
+				>
+					{isDeleting ? 'Deleting...' : 'Delete All Transactions'}
+				</button>
+			</div>
 		</div>
 	</div>
 {/if}
@@ -688,271 +710,4 @@
 	</div>
 {/if}
 
-<style>
-	.modal-overlay {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background-color: rgba(0, 0, 0, 0.5);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		z-index: 1000;
-	}
 
-	.modal-content {
-		background: white;
-		border-radius: 12px;
-		padding: 24px;
-		max-width: 400px;
-		width: 90%;
-		box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-	}
-
-	.edit-modal {
-		background: #fff;
-		border-radius: 16px;
-		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-		padding: 20px;
-		width: 90%;
-		max-width: 640px;
-		outline: none;
-	}
-
-	.edit-modal__header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 12px;
-	}
-
-	.edit-modal__header h2 {
-		margin: 0;
-		font-size: 1.4rem;
-		font-weight: 700;
-	}
-
-	.close-btn {
-		background: transparent;
-		border: none;
-		font-size: 1.5rem;
-		line-height: 1;
-		cursor: pointer;
-	}
-
-	.edit-modal__body {
-		background: #f8f8fb;
-		border-radius: 14px;
-		padding: 16px;
-		display: flex;
-		flex-direction: column;
-		gap: 16px;
-	}
-
-	.form-section {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-	}
-
-	.type-section {
-		gap: 8px;
-	}
-
-	.section-label {
-		font-weight: 600;
-		color: #222;
-	}
-
-	.type-toggle {
-		display: flex;
-		gap: 16px;
-		align-items: center;
-		padding: 0;
-		width: 100%;
-		box-sizing: border-box;
-	}
-
-	.type-toggle input {
-		margin: 0;
-		cursor: pointer;
-		accent-color: #05051a;
-	}
-
-	.toggle-option {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		font-weight: 600;
-		cursor: pointer;
-		margin: 0;
-	}
-
-	.toggle-option.expense span {
-		color: #c53030;
-	}
-
-	.toggle-option.income span {
-		color: #2f855a;
-	}
-
-	.text-input,
-	.text-area,
-	.edit-modal select {
-		width: 100%;
-		border: 1px solid #d9dbe0;
-		border-radius: 10px;
-		padding: 12px;
-		background: #f3f4f7;
-		font-size: 1rem;
-	}
-
-	.text-area {
-		resize: vertical;
-	}
-
-	.primary-btn {
-		margin-top: 4px;
-		width: 100%;
-		border: none;
-		border-radius: 12px;
-		background: #05051a;
-		color: #fff;
-		padding: 14px;
-		font-size: 1rem;
-		font-weight: 700;
-		cursor: pointer;
-		display: inline-flex;
-		justify-content: center;
-		align-items: center;
-		gap: 8px;
-	}
-
-	.primary-btn .plus {
-		font-weight: 900;
-	}
-
-	.form-error {
-		background: #ffe5e5;
-		color: #b00020;
-		border: 1px solid #f5b7b7;
-		border-radius: 10px;
-		padding: 10px 12px;
-		font-weight: 600;
-	}
-
-	.modal-content h3 {
-		margin: 0 0 12px 0;
-		font-size: 1.25rem;
-		font-weight: 600;
-		color: #1a202c;
-	}
-
-	.modal-content p {
-		margin: 0 0 24px 0;
-		color: #4a5568;
-		line-height: 1.5;
-	}
-
-	.modal-actions {
-		display: flex;
-		gap: 12px;
-		justify-content: flex-end;
-	}
-
-	.btn-cancel,
-	.btn-delete {
-		padding: 10px 20px;
-		border-radius: 8px;
-		font-weight: 500;
-		cursor: pointer;
-		border: none;
-		transition: all 0.2s;
-	}
-
-	.btn-cancel {
-		background: #e2e8f0;
-		color: #2d3748;
-	}
-
-	.btn-cancel:hover {
-		background: #cbd5e0;
-	}
-
-	.btn-delete {
-		background: #000;
-		color: white;
-	}
-
-	.btn-delete:hover {
-		background: #2d3748;
-	}
-
-	.toast {
-		position: fixed !important;
-		bottom: 24px !important;
-		right: 24px !important;
-		background: white;
-		border-radius: 12px;
-		padding: 16px 20px;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-		display: flex;
-		align-items: center;
-		gap: 16px;
-		min-width: 300px;
-		max-width: 400px;
-		z-index: 9999 !important;
-		animation: slideIn 0.3s ease-out;
-		border-left: 4px solid;
-	}
-
-	@keyframes slideIn {
-		from {
-			transform: translateX(400px);
-			opacity: 0;
-		}
-		to {
-			transform: translateX(0);
-			opacity: 1;
-		}
-	}
-
-	.toast.success {
-		border-left-color: #10b981;
-	}
-
-	.toast.error {
-		border-left-color: #ef4444;
-	}
-
-	.toast-message {
-		flex: 1;
-		color: #1a202c;
-		font-weight: 500;
-		font-size: 0.95rem;
-	}
-
-	.toast-close {
-		background: none;
-		border: none;
-		font-size: 1.5rem;
-		color: #718096;
-		cursor: pointer;
-		padding: 0;
-		width: 24px;
-		height: 24px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border-radius: 4px;
-		transition: all 0.2s;
-		line-height: 1;
-	}
-
-	.toast-close:hover {
-		background: #f7fafc;
-		color: #2d3748;
-	}
-</style>
