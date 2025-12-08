@@ -17,13 +17,13 @@
 
 	let showCategoryMenu = false;
 
-	function chooseCategory(c) {
-		editForm = { ...editForm, categoryId: c.id };
+	function chooseCategory(category) {
+		editForm = { ...editForm, categoryId: category.id };
 		showCategoryMenu = false;
 	}
 
 	function getCategoryLabel() {
-		const cat = editCategoryOptions.find(c => c.id === editForm.categoryId);
+		const cat = editCategoryOptions.find(option => option.id === editForm.categoryId);
 		return cat ? cat.name : 'Select a category';
 	}
 </script>

@@ -8,7 +8,6 @@
 	// styles + icons
 	import '$lib/styles/app-nav.css';
 	import walletIcon from '$lib/pictures/white-wallet.png';
-	import trashWhiteIcon from '$lib/pictures/trash-white.png';
 
 	// modal components
 	import AccountSettingsModal from '$lib/components/AccountSettingsModal.svelte';
@@ -105,48 +104,6 @@
 		showDeleteConfirmation = false;
 		deleteAccountPassword = '';
 		deleteAccountError = '';
-	}
-
-	async function confirmDeleteAccount() {
-		if (!deleteAccountPassword) {
-			deleteAccountError = 'Please enter your password';
-			return;
-		}
-
-		isDeleting = true;
-		deleteAccountError = '';
-
-		try {
-			const userId = localStorage.getItem('userId') || '1';
-			const res = await fetch(`/api/auth/delete-account`, {
-				method: 'DELETE',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					userId: parseInt(userId, 10),
-					password: deleteAccountPassword
-				})
-			});
-
-			if (!res.ok) {
-				const error = await res.json();
-				throw new Error(error.error || 'Failed to delete account');
-			}
-
-			// Clear auth and redirect
-			auth.set({ username: null, token: null });
-			if (browser) {
-				localStorage.removeItem('token');
-				localStorage.removeItem('auth');
-				localStorage.removeItem('username');
-				localStorage.removeItem('userId');
-				window.location.href = resolve('/auth');
-			}
-		} catch (err) {
-			console.error('Error deleting account:', err);
-			deleteAccountError = err.message || 'Failed to delete account. Please try again.';
-		} finally {
-			isDeleting = false;
-		}
 	}
 </script>
 
