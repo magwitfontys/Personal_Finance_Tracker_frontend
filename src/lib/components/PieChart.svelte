@@ -1,5 +1,6 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
+	import '$lib/styles/pie-chart.css';
 	import { Chart, ArcElement, Tooltip, Legend } from 'chart.js';
 
 	Chart.register(ArcElement, Tooltip, Legend);
@@ -93,41 +94,4 @@
 	</div>
 </div>
 
-<style>
-	.chart-container {
-		width: 100%;
-		max-width: 500px;
-		background: white;
-		border-radius: 16px;
-		padding: 24px;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-	}
 
-	.chart-title {
-		font-size: 20px;
-		font-weight: 500;
-		margin: 0 0 20px 0;
-		color: #333;
-	}
-
-	.chart-wrapper {
-		width: 100%;
-		height: 300px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		margin-bottom: 20px;
-	}
-
-	.legend {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 16px;
-		justify-content: center;
-	}
-
-	.legend-item {
-		font-size: 14px;
-		font-weight: 500;
-	}
-</style>

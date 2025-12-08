@@ -9,6 +9,10 @@
 	import '$lib/styles/app-nav.css';
 	import walletIcon from '$lib/pictures/white-wallet.png';
 
+	// modal components
+	import AccountSettingsModal from '$lib/components/AccountSettingsModal.svelte';
+	import DeleteAccountModal from '$lib/components/DeleteAccountModal.svelte';
+
 	// single (dark) variants; we turn them white with CSS when active
 	import dashboardIcon from '$lib/pictures/dashboard.png';
 	import addIcon from '$lib/pictures/add.png';
@@ -23,6 +27,13 @@
 	$: isAdd = path.startsWith('/add-transaction');
 	$: isTransactions = path.startsWith('/transactions');
 	$: isPrivacy = path.startsWith('/privacy');
+
+	// Delete account modal state
+	let showDeleteAccountModal = false;
+	let showDeleteConfirmation = false;
+	let deleteAccountPassword = '';
+	let deleteAccountError = '';
+	let isDeleting = false;
 
 	// hydrate auth from localStorage so header shows after refresh
 	onMount(() => {
@@ -58,6 +69,41 @@
 			localStorage.removeItem('username');
 			window.location.href = resolve('/auth');
 		}
+	}
+
+	// Extract the part before @ from email/username
+	function getDisplayName(email) {
+		if (!email) return 'User';
+		const atIndex = email.indexOf('@');
+		if (atIndex > -1) {
+			return email.substring(0, atIndex);
+		}
+		return email;
+	}
+
+	function openDeleteAccountModal() {
+		showDeleteAccountModal = true;
+		showDeleteConfirmation = false;
+		deleteAccountPassword = '';
+		deleteAccountError = '';
+	}
+
+	function closeDeleteAccountModal() {
+		showDeleteAccountModal = false;
+		showDeleteConfirmation = false;
+		deleteAccountPassword = '';
+		deleteAccountError = '';
+	}
+
+	function proceedToDeleteConfirmation() {
+		showDeleteConfirmation = true;
+		deleteAccountError = '';
+	}
+
+	function backToAccountInfo() {
+		showDeleteConfirmation = false;
+		deleteAccountPassword = '';
+		deleteAccountError = '';
 	}
 </script>
 
@@ -125,7 +171,9 @@
 
 		<!-- Right -->
 		<div class="nav-right">
-			<span class="user-pill">{$auth?.username ?? 'User'}</span>
+			<button type="button" class="user-pill" on:click={openDeleteAccountModal} title="Click to manage account">
+				{getDisplayName($auth?.username ?? 'User')}
+			</button>
 			<button type="button" class="logout" on:click={logout}>
 				<img class="nav-icon" alt="" src={exitIcon} />
 				<span>Logout</span>
@@ -135,4 +183,24 @@
 </nav>
 {/if}
 
+<!-- Account Settings Modal -->
+<AccountSettingsModal
+	isOpen={showDeleteAccountModal && !showDeleteConfirmation}
+	username={$auth?.username ?? ''}
+	onClose={closeDeleteAccountModal}
+	onDeleteClick={proceedToDeleteConfirmation}
+/>
+
+<!-- Delete Account Modal -->
+<DeleteAccountModal
+	isOpen={showDeleteConfirmation}
+	bind:password={deleteAccountPassword}
+	bind:error={deleteAccountError}
+	bind:isDeleting
+	onBack={backToAccountInfo}
+	onClose={closeDeleteAccountModal}
+/>
+
 <slot />
+
+

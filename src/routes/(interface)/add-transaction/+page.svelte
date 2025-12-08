@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { env } from '$env/dynamic/public';
 	import '$lib/styles/add-transaction.css';
+	import '$lib/styles/add-transaction-page.css';
 
 	/* icons (button only) */
 	import addIcon from '$lib/pictures/white-add.png';
@@ -143,7 +144,22 @@
 			showToastNotification('Transaction added successfully!', 'success');
 		} catch (err) {
 			console.error('Error creating transaction:', err);
-			showToastNotification('Failed to add transaction: ' + err.message, 'error');
+
+			// If the backend rejects due to unknown user_id (FK), auto-clear stale session and redirect to login
+			const msg = (err && err.message) || '';
+			const fkError = msg.toLowerCase().includes('foreign key') || msg.toLowerCase().includes('fk_tx_user');
+			if (fkError) {
+				localStorage.removeItem('userId');
+				localStorage.removeItem('auth');
+				localStorage.removeItem('username');
+				showToastNotification('Session refreshed. Please log in again.', 'error', 3000);
+				setTimeout(() => {
+					window.location.href = '/auth';
+				}, 1200);
+				return;
+			}
+
+			showToastNotification('Failed to add transaction: ' + msg, 'error');
 		}
 	}
 </script>
@@ -316,70 +332,4 @@
 	</div>
 {/if}
 
-<style>
-	.toast {
-		position: fixed !important;
-		bottom: 24px !important;
-		right: 24px !important;
-		background: white;
-		border-radius: 12px;
-		padding: 16px 20px;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-		display: flex;
-		align-items: center;
-		gap: 16px;
-		min-width: 300px;
-		max-width: 400px;
-		z-index: 9999 !important;
-		animation: slideIn 0.3s ease-out;
-		border-left: 4px solid;
-	}
 
-	@keyframes slideIn {
-		from {
-			transform: translateX(400px);
-			opacity: 0;
-		}
-		to {
-			transform: translateX(0);
-			opacity: 1;
-		}
-	}
-
-	.toast.success {
-		border-left-color: #10b981;
-	}
-
-	.toast.error {
-		border-left-color: #ef4444;
-	}
-
-	.toast-message {
-		flex: 1;
-		color: #1a202c;
-		font-weight: 500;
-		font-size: 0.95rem;
-	}
-
-	.toast-close {
-		background: none;
-		border: none;
-		font-size: 1.5rem;
-		color: #718096;
-		cursor: pointer;
-		padding: 0;
-		width: 24px;
-		height: 24px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border-radius: 4px;
-		transition: all 0.2s;
-		line-height: 1;
-	}
-
-	.toast-close:hover {
-		background: #f7fafc;
-		color: #2d3748;
-	}
-</style>

@@ -112,6 +112,12 @@
   background: #f8f8f8;
   font-size: 0.85rem;
   white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.user-pill:hover {
+  background: #e6e6e6;
+  border-color: #ccc;
 }
 .logout, .logout-btn {
   border: none;
