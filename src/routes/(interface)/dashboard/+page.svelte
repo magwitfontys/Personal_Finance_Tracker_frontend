@@ -3,13 +3,13 @@
 	import { browser } from '$app/environment';
 	import { auth } from '$lib/stores/authStore';
 	import { env } from '$env/dynamic/public';
+	import { SvelteMap } from 'svelte/reactivity';
 	import BarChart from '$lib/components/BarChart.svelte';
 	import PieChart from '$lib/components/PieChart.svelte';
 	import '$lib/styles/dashboard.css';
 
 	const API_BASE = (env.PUBLIC_API_BASE || '/api').replace(/\/$/, '');
 
-	let username = '';
 	let transactions = [];
 	let categories = []; // [{ id, name, income }, ...]
 	let isLoading = true;
@@ -88,7 +88,7 @@
 
 			// Combine and dedupe by id
 			const combined = [...incomeData, ...expenseData];
-			const map = new Map();
+			const map = new SvelteMap();
 			combined.forEach((c) => {
 				if (!map.has(c.id)) {
 					map.set(c.id, c);
@@ -179,7 +179,6 @@
 
 		// We are authenticated -> reflect in store + page
 		auth.set({ token: a.token ?? null, username: a.username ?? null });
-		username = a.username ?? 'User';
 
 		// Load categories first, then transactions
 		await loadCategories();
