@@ -22,10 +22,7 @@
 		showCategoryMenu = false;
 	}
 
-	function getCategoryLabel() {
-		const cat = editCategoryOptions.find(option => option.id === editForm.categoryId);
-		return cat ? cat.name : 'Select a category';
-	}
+	$: categoryLabel = editCategoryOptions.find(option => option.id === editForm.categoryId)?.name || 'Select a category';
 </script>
 
 <svelte:window on:click={() => (showCategoryMenu = false)} />
@@ -112,7 +109,7 @@
 								}
 							}}
 						>
-							<span>{getCategoryLabel()}</span>
+							<span>{categoryLabel}</span>
 							<span class="chev" aria-hidden="true">▾</span>
 						</button>
 

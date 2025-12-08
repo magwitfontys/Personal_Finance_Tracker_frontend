@@ -175,28 +175,28 @@
 		<div class="field">
 			<fieldset class="fieldset">
 				<legend class="label">Type</legend>
-				<div class="type-toggle" role="tablist" aria-label="Transaction type">
-					<button
-						type="button"
-						class="chip expense"
-						class:active={type === 'expense'}
-						on:click={() => selectType('expense')}
-						aria-pressed={type === 'expense'}
-					>
-						<span class="dot"></span>
-						<span class="chip-text expense-text">Expense</span>
-					</button>
+				<div class="type-toggle">
+					<label class="toggle-option expense">
+						<input
+							type="radio"
+							name="transaction-type"
+							value="expense"
+							checked={type === 'expense'}
+							on:change={() => selectType('expense')}
+						/>
+						<span>Expense</span>
+					</label>
 
-					<button
-						type="button"
-						class="chip income"
-						class:active={type === 'income'}
-						on:click={() => selectType('income')}
-						aria-pressed={type === 'income'}
-					>
-						<span class="dot"></span>
-						<span class="chip-text income-text">Income</span>
-					</button>
+					<label class="toggle-option income">
+						<input
+							type="radio"
+							name="transaction-type"
+							value="income"
+							checked={type === 'income'}
+							on:change={() => selectType('income')}
+						/>
+						<span>Income</span>
+					</label>
 				</div>
 			</fieldset>
 		</div>

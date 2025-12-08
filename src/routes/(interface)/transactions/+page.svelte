@@ -11,6 +11,7 @@
 	import filterIcon from '$lib/pictures/filter.png';
 	import editIcon from '$lib/pictures/file-edit.png';
 	import trashIcon from '$lib/pictures/trash.png';
+	import warningIcon from '$lib/pictures/triangle-warning.png';
 
 	// Base for API calls
 	const API_BASE = (env.PUBLIC_API_BASE || '/api').replace(/\/$/, '');
@@ -243,7 +244,7 @@
 	}
 
 	async function confirmDeleteAll() {
-		const requiredText = 'Yes I would like to delete all the transactions';
+		const requiredText = 'Delete all transactions';
 
 		if (deleteAllConfirmation !== requiredText) {
 			deleteAllError = `Please type the exact text: "${requiredText}"`;
@@ -660,12 +661,15 @@
 			aria-modal="true"
 			tabindex="-1"
 		>
-			<h3 id="delete-all-title">⚠️ Delete All Transactions</h3>
+			<h3 id="delete-all-title">
+				<img src={warningIcon} alt="Warning" class="warning-icon" />
+				Delete All Transactions
+			</h3>
 			<div class="delete-all-warning">
 				<p><strong>This action cannot be undone!</strong></p>
 				<p>You are about to permanently delete <strong>all</strong> of your transactions. This process is not reversible.</p>
 				<p style="margin-top: 16px;">If you are absolutely sure you want to delete all your transactions, please type the following text in the field below:</p>
-				<div class="required-text">Yes I would like to delete all the transactions</div>
+				<div class="required-text">Delete all transactions</div>
 			</div>
 
 			{#if deleteAllError}
@@ -693,7 +697,7 @@
 					type="button"
 					class="btn-delete-all"
 					on:click={confirmDeleteAll}
-					disabled={isDeleting || deleteAllConfirmation !== 'Yes I would like to delete all the transactions'}
+					disabled={isDeleting || deleteAllConfirmation !== 'Delete all transactions'}
 				>
 					{isDeleting ? 'Deleting...' : 'Delete All Transactions'}
 				</button>
