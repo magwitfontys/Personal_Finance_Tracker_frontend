@@ -14,7 +14,21 @@
 	export let editCategoryOptions = [];
 	export let onClose = () => {};
 	export let onSubmit = (e) => {};
+
+	let showCategoryMenu = false;
+
+	function chooseCategory(c) {
+		editForm = { ...editForm, categoryId: c.id };
+		showCategoryMenu = false;
+	}
+
+	function getCategoryLabel() {
+		const cat = editCategoryOptions.find(c => c.id === editForm.categoryId);
+		return cat ? cat.name : 'Select a category';
+	}
 </script>
+
+<svelte:window on:click={() => (showCategoryMenu = false)} />
 
 {#if isOpen}
 	<div class="modal-overlay" role="presentation" on:click={onClose}>
@@ -36,7 +50,7 @@
 					<div class="form-error">{editError}</div>
 				{/if}
 				<div class="form-section type-section">
-					<label class="section-label">Type</label>
+					<span class="section-label">Type</span>
 					<div class="type-toggle">
 						<label class="toggle-option expense">
 							<input
@@ -76,20 +90,74 @@
 
 				<div class="form-section">
 					<label class="section-label" for="edit-category">Category</label>
-					<select
-						class="text-input"
-						id="edit-category"
-						bind:value={editForm.categoryId}
-						required
-					>
-						{#if !editCategoryOptions.length}
-							<option value="" disabled>Select type first</option>
-						{:else}
-							{#each editCategoryOptions as c (c.id)}
-								<option value={c.id}>{c.name}</option>
-							{/each}
+					<div class="menu">
+						<button
+							id="edit-category"
+							type="button"
+							class="menu-btn"
+							aria-haspopup="listbox"
+							aria-expanded={showCategoryMenu}
+							aria-controls="category-panel"
+							on:click={(e) => {
+								e.stopPropagation();
+								showCategoryMenu = !showCategoryMenu;
+							}}
+							on:keydown={(e) => {
+								if (e.key === 'Enter' || e.key === ' ') {
+									e.preventDefault();
+									showCategoryMenu = !showCategoryMenu;
+								}
+								if (e.key === 'Escape') {
+									showCategoryMenu = false;
+								}
+							}}
+						>
+							<span>{getCategoryLabel()}</span>
+							<span class="chev" aria-hidden="true">▾</span>
+						</button>
+
+						{#if showCategoryMenu}
+							<ul
+								id="category-panel"
+								class="menu-panel wide"
+								role="listbox"
+								aria-labelledby="edit-category"
+							>
+								{#if editCategoryOptions.length === 0}
+									<li>
+										<button type="button" class="menu-item" aria-disabled="true">
+											No categories available
+										</button>
+									</li>
+								{:else}
+									{#each editCategoryOptions as c (c.id)}
+										<li>
+											<button
+												type="button"
+												class="menu-item"
+												role="option"
+												aria-selected={editForm.categoryId === c.id}
+												on:click={(e) => {
+													e.stopPropagation();
+													chooseCategory(c);
+												}}
+												on:keydown={(e) => {
+													if (e.key === 'Escape') {
+														showCategoryMenu = false;
+													}
+												}}
+											>
+												<span>{c.name}</span>
+												{#if editForm.categoryId === c.id}
+													<span class="check">✓</span>
+												{/if}
+											</button>
+										</li>
+									{/each}
+								{/if}
+							</ul>
 						{/if}
-					</select>
+					</div>
 				</div>
 
 				<div class="form-section">

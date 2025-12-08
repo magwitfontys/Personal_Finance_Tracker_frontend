@@ -49,12 +49,15 @@
 	display: flex;
 	flex-direction: column;
 	gap: 16px;
+	max-width: 100%;
 }
 
 .form-section {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
+	max-width: 100%;
+	width: 100%;
 }
 
 .type-section {
@@ -66,6 +69,7 @@
 	color: #222;
 }
 
+/* Type toggle */
 .type-toggle {
 	display: flex;
 	gap: 16px;
@@ -78,7 +82,14 @@
 .type-toggle input {
 	margin: 0;
 	cursor: pointer;
-	accent-color: #05051a;
+}
+
+.toggle-option.expense input {
+	accent-color: #c53030;
+}
+
+.toggle-option.income input {
+	accent-color: #2f855a;
 }
 
 .toggle-option {
@@ -103,10 +114,19 @@
 .edit-modal select {
 	width: 100%;
 	border: 1px solid #d9dbe0;
-	border-radius: 10px;
-	padding: 12px;
 	background: #f3f4f7;
-	font-size: 1rem;
+	color: #111;
+	padding: 12px;
+	border-radius: 10px;
+	outline: none;
+	transition: border 0.15s ease;
+	box-sizing: border-box;
+}
+
+.text-input:focus,
+.text-area:focus,
+.edit-modal select:focus {
+	border-color: #999;
 }
 
 .text-area {
@@ -141,4 +161,101 @@
 	border-radius: 10px;
 	padding: 10px 12px;
 	font-weight: 600;
+}
+
+/* Custom dropdown menu matching add transaction */
+.menu {
+	position: relative;
+	width: 100%;
+}
+
+.menu-btn {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0.9rem 0.95rem;
+	border-radius: 12px;
+	border: 1px solid transparent;
+	background: #f3f3f6;
+	font: inherit;
+	color: #111;
+	cursor: pointer;
+	transition: border 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.menu-btn:focus-visible {
+	outline: none;
+	border: 1px solid #111;
+	background: #f7f7fa;
+	box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.08);
+}
+
+.menu-btn .chev {
+	font-size: 0.8rem;
+	opacity: 0.65;
+}
+
+.menu-panel {
+	position: absolute;
+	top: calc(100% + 4px);
+	left: 0;
+	right: 0;
+	background: #ffffff;
+	border-radius: 14px;
+	border: 1px solid #e5e7eb;
+	box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+	padding: 0.25rem 0;
+	max-height: 270px;
+	overflow-y: auto;
+	z-index: 30;
+}
+
+.menu-panel.wide {
+	max-height: 270px;
+}
+
+.menu-panel li {
+	list-style: none;
+}
+
+.menu-item {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0.75rem 1rem;
+	background: transparent;
+	border: none;
+	margin: 0;
+	font-size: 0.95rem;
+	text-align: left;
+	cursor: pointer;
+}
+
+.menu-item + .menu-item {
+	border-top: 1px solid #f3f4f6;
+}
+
+.menu-item:hover {
+	background: #f3f3f6;
+}
+
+.menu-item[aria-disabled='true'] {
+	cursor: default;
+	color: #999;
+}
+
+.menu-item[aria-selected='true'] {
+	background: #111827;
+	color: #ffffff;
+}
+
+.menu-item .check {
+	font-size: 0.9rem;
+	opacity: 0.8;
+}
+
+.menu-item[aria-selected='true'] .check {
+	color: #ffffff;
 }
