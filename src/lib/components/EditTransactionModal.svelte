@@ -13,7 +13,7 @@
 	export let editError = '';
 	export let editCategoryOptions = [];
 	export let onClose = () => {};
-	export let onSubmit = (e) => {};
+	export let onSubmit = () => {};
 
 	let showCategoryMenu = false;
 
@@ -34,8 +34,8 @@
 	<div class="modal-overlay" role="presentation" on:click={onClose}>
 		<div
 			class="edit-modal"
-			on:click={(e) => e.stopPropagation()}
-			on:keydown={(e) => e.key === 'Escape' && onClose()}
+			on:click={(event) => event.stopPropagation()}
+			on:keydown={(event) => event.key === 'Escape' && onClose()}
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby="edit-title"
@@ -98,16 +98,16 @@
 							aria-haspopup="listbox"
 							aria-expanded={showCategoryMenu}
 							aria-controls="category-panel"
-							on:click={(e) => {
-								e.stopPropagation();
+							on:click={(event) => {
+								event.stopPropagation();
 								showCategoryMenu = !showCategoryMenu;
 							}}
-							on:keydown={(e) => {
-								if (e.key === 'Enter' || e.key === ' ') {
-									e.preventDefault();
+							on:keydown={(event) => {
+								if (event.key === 'Enter' || event.key === ' ') {
+									event.preventDefault();
 									showCategoryMenu = !showCategoryMenu;
 								}
-								if (e.key === 'Escape') {
+								if (event.key === 'Escape') {
 									showCategoryMenu = false;
 								}
 							}}
