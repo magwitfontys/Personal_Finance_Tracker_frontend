@@ -27,6 +27,10 @@
 	let typeFilter = 'all'; // 'all' | 'income' | 'expense'
 	let categoryFilter = 'all'; // 'all' | category name
 
+	/* pagination */
+	const PAGE_SIZE = 30;
+	let currentPage = 1;
+
 	/* dropdown menu state */
 	let showTypeMenu = false;
 	let showCategoryMenu = false;
@@ -173,6 +177,15 @@
 		}
 		return true;
 	});
+
+	// derived pagination based on filtered results
+	$: totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+	$: {
+		if (currentPage > totalPages) currentPage = totalPages;
+		if (currentPage < 1) currentPage = 1;
+	}
+	$: pageStart = (currentPage - 1) * PAGE_SIZE;
+	$: paged = filtered.slice(pageStart, pageStart + PAGE_SIZE);
 
 	// categories available for the current edit selection
 	$: editCategoryOptions = categories.filter((c) =>
@@ -358,13 +371,23 @@
 
 	async function selectType(v) {
 		typeFilter = v;
+		currentPage = 1;
 		showTypeMenu = false;
 		await loadCategories(v);
 	}
 
 	function selectCategory(name) {
 		categoryFilter = name;
+		currentPage = 1;
 		showCategoryMenu = false;
+	}
+
+	function prevPage() {
+		currentPage = Math.max(1, currentPage - 1);
+	}
+
+	function nextPage() {
+		currentPage = Math.min(totalPages, currentPage + 1);
 	}
 
 	/* labels for buttons */
@@ -404,6 +427,7 @@
 					type="search"
 					placeholder="Search transactions..."
 					bind:value={q}
+					on:input={() => (currentPage = 1)}
 				/>
 			</label>
 
@@ -575,7 +599,7 @@
 			<p class="empty">No transactions found.</p>
 		{:else}
 			<ul class="tx-list" role="list">
-				{#each filtered as t (t.id)}
+				{#each paged as t (t.id)}
 					<li class="tx-item">
 						<div class="left">
 							<span class="badge {t.type}">{t.category}</span>
@@ -614,6 +638,16 @@
 					</li>
 				{/each}
 			</ul>
+
+			<!-- Pagination Controls -->
+			<div class="pagination" aria-label="Pagination" style="display: flex; align-items: center; gap: 12px; justify-content: flex-end; margin-top: 12px;">
+				<button type="button" on:click={prevPage} disabled={currentPage === 1} aria-label="Previous page">Prev</button>
+				<span>Page {currentPage} of {totalPages}</span>
+				<span>
+					Showing {filtered.length === 0 ? 0 : pageStart + 1}–{Math.min(pageStart + PAGE_SIZE, filtered.length)} of {filtered.length}
+				</span>
+				<button type="button" on:click={nextPage} disabled={currentPage === totalPages} aria-label="Next page">Next</button>
+			</div>
 		{/if}
 	</div>
 </section>

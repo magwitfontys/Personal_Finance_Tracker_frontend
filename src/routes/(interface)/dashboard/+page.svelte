@@ -7,6 +7,7 @@
 	import BarChart from '$lib/components/BarChart.svelte';
 	import PieChart from '$lib/components/PieChart.svelte';
 	import '$lib/styles/dashboard.css';
+	import '$lib/styles/transactions.css';
 
 	const API_BASE = (env.PUBLIC_API_BASE || '/api').replace(/\/$/, '');
 
@@ -22,6 +23,24 @@
 	// Pie chart data
 	let pieChartLabels = [];
 	let pieChartData = [];
+
+	// Timeframe filter for pie chart
+	let timeframe = 'lifetime'; // '1m' | '3m' | '1y' | 'lifetime'
+	let showTimeframeMenu = false;
+
+	// Robust outside-click handler: close only when clicking outside the dropdown trigger/panel
+	function handleWindowClick(e) {
+		// If menu isn't open, nothing to do
+		if (!showTimeframeMenu) return;
+		const path = e.composedPath ? e.composedPath() : [];
+		const clickedInsideMenu = path.some((el) => {
+			if (!el || !el.classList) return false;
+			return el.classList.contains('menu') || el.classList.contains('menu-btn') || el.classList.contains('menu-panel') || el.classList.contains('menu-item');
+		});
+		if (!clickedInsideMenu) {
+			showTimeframeMenu = false;
+		}
+	}
 
 	function getCategoryNameById(categoryId) {
 		const cat = categories.find((c) => c.id === categoryId);
@@ -139,10 +158,35 @@
 		console.log('[Dashboard] Transactions:', transactions);
 		console.log('[Dashboard] Categories:', categories);
 		
+		// Apply timeframe filter for pie chart
+		let filteredTx = transactions;
+		if (timeframe !== 'lifetime') {
+			const now = new Date();
+			let startDate;
+			switch (timeframe) {
+				case '1m':
+					startDate = new Date(now);
+					startDate.setMonth(startDate.getMonth() - 1);
+					break;
+				case '3m':
+					startDate = new Date(now);
+					startDate.setMonth(startDate.getMonth() - 3);
+					break;
+				case '1y':
+					startDate = new Date(now);
+					startDate.setFullYear(startDate.getFullYear() - 1);
+					break;
+			}
+			filteredTx = transactions.filter((tx) => {
+				const d = new Date(tx.txnDate);
+				return d >= startDate && d <= now;
+			});
+		}
+
 		// Group expenses by category
 		const categoryData = {};
 
-		transactions.forEach((tx) => {
+		filteredTx.forEach((tx) => {
 			if (tx.txnType === 'EXPENSE') {
 				const categoryName = getCategoryNameById(tx.categoryId);
 				console.log(`[Dashboard] Transaction ${tx.transactionId}: categoryId=${tx.categoryId}, categoryName=${categoryName}, amount=${tx.amount}`);
@@ -184,7 +228,19 @@
 		await loadCategories();
 		await loadTransactions();
 	});
+
+	function selectTimeframe(tf) {
+		timeframe = tf;
+		showTimeframeMenu = false;
+		processPieChartData();
+	}
+
+	$: timeframeLabel =
+		timeframe === '1m' ? '1 month' : timeframe === '3m' ? '3 months' : timeframe === '1y' ? '1 year' : 'Lifetime';
 </script>
+
+<!-- click-outside to close timeframe menu -->
+<svelte:window on:click={handleWindowClick} />
 
 {#if isLoading}
 	<p>Loading...</p>
@@ -196,12 +252,75 @@
 			incomeData={barChartIncome}
 			expenseData={barChartExpenses}
 		/>
-		<PieChart
-			title="Expenses by Category"
-			labels={pieChartLabels}
-			data={pieChartData}
-		/>
+
+		<!-- Wrap pie chart and place dropdown inside its box (top-right) -->
+		<div class="chart-box" style="position: relative;">
+						<div class="menu" style="position: absolute; top: 12px; right: 12px;">
+				<button
+					type="button"
+					class="menu-btn small"
+					aria-haspopup="listbox"
+					aria-expanded={showTimeframeMenu}
+					on:click|stopPropagation={() => { showTimeframeMenu = !showTimeframeMenu; }}
+					on:keydown={(e) => {
+						if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showTimeframeMenu = !showTimeframeMenu; }
+					}}
+				>
+					<span>{timeframeLabel}</span>
+					<span class="chev" aria-hidden="true">▾</span>
+				</button>
+							{#if showTimeframeMenu}
+								<ul class="menu-panel" role="listbox" aria-label="Timeframe" on:click|stopPropagation>
+						<li>
+							<button type="button" class="menu-item" role="option" aria-selected={timeframe === '1m'} on:click|stopPropagation={() => selectTimeframe('1m')}>
+								<span>1 month</span>
+								{#if timeframe === '1m'}<span class="check">✓</span>{/if}
+							</button>
+						</li>
+						<li>
+							<button type="button" class="menu-item" role="option" aria-selected={timeframe === '3m'} on:click|stopPropagation={() => selectTimeframe('3m')}>
+								<span>3 months</span>
+								{#if timeframe === '3m'}<span class="check">✓</span>{/if}
+							</button>
+						</li>
+						<li>
+							<button type="button" class="menu-item" role="option" aria-selected={timeframe === '1y'} on:click|stopPropagation={() => selectTimeframe('1y')}>
+								<span>1 year</span>
+								{#if timeframe === '1y'}<span class="check">✓</span>{/if}
+							</button>
+						</li>
+						<li>
+							<button type="button" class="menu-item" role="option" aria-selected={timeframe === 'lifetime'} on:click|stopPropagation={() => selectTimeframe('lifetime')}>
+								<span>Lifetime</span>
+								{#if timeframe === 'lifetime'}<span class="check">✓</span>{/if}
+							</button>
+						</li>
+					</ul>
+				{/if}
+			</div>
+
+			<PieChart
+				title="Expenses by Category"
+				labels={pieChartLabels}
+				data={pieChartData}
+			/>
+		</div>
 	</div>
+
+<style>
+	/* Make the timeframe dropdown compact to avoid covering the title */
+	.chart-box .menu .menu-btn.small {
+		font: inherit; /* match add-transaction base */
+		padding: 0.45rem 0.6rem; /* slightly tighter to avoid title overlap */
+		line-height: 1.1;
+		height: auto;
+		min-height: unset;
+	}
+	/* Keep the panel readable; no change needed but ensure positioning works with smaller trigger */
+	.chart-box .menu .menu-panel {
+		min-width: 190px; /* match shared dropdown width */
+	}
+</style>
 	<!-- Debug info -->
 	<div style="display: none;">
 		<p>Pie Chart Labels: {JSON.stringify(pieChartLabels)}</p>
