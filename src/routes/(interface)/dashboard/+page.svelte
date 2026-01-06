@@ -7,7 +7,6 @@
 	import BarChart from '$lib/components/BarChart.svelte';
 	import PieChart from '$lib/components/PieChart.svelte';
 	import '$lib/styles/dashboard.css';
-	import '$lib/styles/transactions.css';
 
 	const API_BASE = (env.PUBLIC_API_BASE || '/api').replace(/\/$/, '');
 
@@ -35,7 +34,7 @@
 		const path = e.composedPath ? e.composedPath() : [];
 		const clickedInsideMenu = path.some((el) => {
 			if (!el || !el.classList) return false;
-			return el.classList.contains('menu') || el.classList.contains('menu-btn') || el.classList.contains('menu-panel') || el.classList.contains('menu-item');
+			return el.classList.contains('timeframe-menu') || el.classList.contains('timeframe-btn') || el.classList.contains('timeframe-panel') || el.classList.contains('timeframe-item');
 		});
 		if (!clickedInsideMenu) {
 			showTimeframeMenu = false;
@@ -255,10 +254,10 @@
 
 		<!-- Wrap pie chart and place dropdown inside its box (top-right) -->
 		<div class="chart-box" style="position: relative;">
-						<div class="menu" style="position: absolute; top: 12px; right: 12px;">
+			<div class="timeframe-menu">
 				<button
 					type="button"
-					class="menu-btn small"
+					class="timeframe-btn"
 					aria-haspopup="listbox"
 					aria-expanded={showTimeframeMenu}
 					on:click|stopPropagation={() => { showTimeframeMenu = !showTimeframeMenu; }}
@@ -270,27 +269,27 @@
 					<span class="chev" aria-hidden="true">▾</span>
 				</button>
 							{#if showTimeframeMenu}
-								<ul class="menu-panel" role="listbox" aria-label="Timeframe" on:click|stopPropagation>
+								<ul class="timeframe-panel" role="listbox" aria-label="Timeframe" on:click|stopPropagation>
 						<li>
-							<button type="button" class="menu-item" role="option" aria-selected={timeframe === '1m'} on:click|stopPropagation={() => selectTimeframe('1m')}>
+							<button type="button" class="timeframe-item" role="option" aria-selected={timeframe === '1m'} on:click|stopPropagation={() => selectTimeframe('1m')}>
 								<span>1 month</span>
 								{#if timeframe === '1m'}<span class="check">✓</span>{/if}
 							</button>
 						</li>
 						<li>
-							<button type="button" class="menu-item" role="option" aria-selected={timeframe === '3m'} on:click|stopPropagation={() => selectTimeframe('3m')}>
+							<button type="button" class="timeframe-item" role="option" aria-selected={timeframe === '3m'} on:click|stopPropagation={() => selectTimeframe('3m')}>
 								<span>3 months</span>
 								{#if timeframe === '3m'}<span class="check">✓</span>{/if}
 							</button>
 						</li>
 						<li>
-							<button type="button" class="menu-item" role="option" aria-selected={timeframe === '1y'} on:click|stopPropagation={() => selectTimeframe('1y')}>
+							<button type="button" class="timeframe-item" role="option" aria-selected={timeframe === '1y'} on:click|stopPropagation={() => selectTimeframe('1y')}>
 								<span>1 year</span>
 								{#if timeframe === '1y'}<span class="check">✓</span>{/if}
 							</button>
 						</li>
 						<li>
-							<button type="button" class="menu-item" role="option" aria-selected={timeframe === 'lifetime'} on:click|stopPropagation={() => selectTimeframe('lifetime')}>
+							<button type="button" class="timeframe-item" role="option" aria-selected={timeframe === 'lifetime'} on:click|stopPropagation={() => selectTimeframe('lifetime')}>
 								<span>Lifetime</span>
 								{#if timeframe === 'lifetime'}<span class="check">✓</span>{/if}
 							</button>
@@ -308,17 +307,90 @@
 	</div>
 
 <style>
-	/* Make the timeframe dropdown compact to avoid covering the title */
-	.chart-box .menu .menu-btn.small {
-		font: inherit; /* match add-transaction base */
-		padding: 0.45rem 0.6rem; /* slightly tighter to avoid title overlap */
-		line-height: 1.1;
-		height: auto;
-		min-height: unset;
+	/* Timeframe dropdown - isolated styles to prevent conflicts */
+	.timeframe-menu {
+		position: absolute;
+		top: 12px;
+		right: 12px;
+		z-index: 100;
 	}
-	/* Keep the panel readable; no change needed but ensure positioning works with smaller trigger */
-	.chart-box .menu .menu-panel {
-		min-width: 190px; /* match shared dropdown width */
+
+	.timeframe-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.45rem 0.6rem;
+		border: 1px solid #d9dbe0;
+		background: #f3f3f6;
+		border-radius: 12px;
+		cursor: pointer;
+		font: inherit;
+		color: #111;
+		line-height: 1.1;
+		transition: border 0.15s ease, background 0.15s ease;
+	}
+
+	.timeframe-btn:hover {
+		background: #e8e8ec;
+	}
+
+	.timeframe-btn:focus-visible {
+		outline: none;
+		border-color: #111;
+		box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.08);
+	}
+
+	.timeframe-btn .chev {
+		opacity: 0.6;
+		font-size: 0.8rem;
+	}
+
+	.timeframe-panel {
+		position: absolute;
+		top: calc(100% + 4px);
+		right: 0;
+		min-width: 190px;
+		background: #ffffff;
+		border: 1px solid #e5e7eb;
+		border-radius: 14px;
+		box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+		padding: 0.25rem 0;
+		z-index: 200;
+		list-style: none;
+		margin: 0;
+	}
+
+	.timeframe-panel li {
+		list-style: none;
+	}
+
+	.timeframe-item {
+		width: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.65rem 1rem;
+		border: none;
+		background: transparent;
+		text-align: left;
+		cursor: pointer;
+		font: inherit;
+		color: #111;
+		transition: background 0.12s ease;
+	}
+
+	.timeframe-item:hover {
+		background: #f7f7fa;
+	}
+
+	.timeframe-item[aria-selected="true"] {
+		background: #f0f0f5;
+		font-weight: 500;
+	}
+
+	.timeframe-item .check {
+		color: #111;
+		font-weight: 600;
 	}
 </style>
 	<!-- Debug info -->
