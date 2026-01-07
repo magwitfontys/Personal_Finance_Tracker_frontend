@@ -269,7 +269,7 @@
 					<span class="chev" aria-hidden="true">▾</span>
 				</button>
 							{#if showTimeframeMenu}
-								<ul class="timeframe-panel" role="listbox" aria-label="Timeframe" on:click|stopPropagation>
+								<ul class="timeframe-panel" role="listbox" aria-label="Timeframe" on:click|stopPropagation on:keydown|stopPropagation>
 						<li>
 							<button type="button" class="timeframe-item" role="option" aria-selected={timeframe === '1m'} on:click|stopPropagation={() => selectTimeframe('1m')}>
 								<span>1 month</span>
