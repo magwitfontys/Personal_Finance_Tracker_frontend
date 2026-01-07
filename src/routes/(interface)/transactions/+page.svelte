@@ -11,6 +11,8 @@
 	import filterIcon from '$lib/pictures/filter.png';
 	import editIcon from '$lib/pictures/file-edit.png';
 	import trashIcon from '$lib/pictures/trash.png';
+	import trashRedIcon from '$lib/pictures/trash-red.png';
+	import warningIcon from '$lib/pictures/triangle-warning.png';
 
 	// Base for API calls
 	const API_BASE = (env.PUBLIC_API_BASE || '/api').replace(/\/$/, '');
@@ -24,6 +26,10 @@
 	let q = '';
 	let typeFilter = 'all'; // 'all' | 'income' | 'expense'
 	let categoryFilter = 'all'; // 'all' | category name
+
+	/* pagination */
+	const PAGE_SIZE = 30;
+	let currentPage = 1;
 
 	/* dropdown menu state */
 	let showTypeMenu = false;
@@ -63,7 +69,7 @@
 
 	const fmt = new Intl.NumberFormat('en-US', {
 		style: 'currency',
-		currency: 'USD'
+		currency: 'EUR'
 	});
 
 	// load transactions from API
@@ -172,6 +178,15 @@
 		return true;
 	});
 
+	// derived pagination based on filtered results
+	$: totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+	$: {
+		if (currentPage > totalPages) currentPage = totalPages;
+		if (currentPage < 1) currentPage = 1;
+	}
+	$: pageStart = (currentPage - 1) * PAGE_SIZE;
+	$: paged = filtered.slice(pageStart, pageStart + PAGE_SIZE);
+
 	// categories available for the current edit selection
 	$: editCategoryOptions = categories.filter((c) =>
 		editForm.type === 'income' ? c.income : !c.income
@@ -243,7 +258,7 @@
 	}
 
 	async function confirmDeleteAll() {
-		const requiredText = 'Yes I would like to delete all the transactions';
+		const requiredText = 'Delete all transactions';
 
 		if (deleteAllConfirmation !== requiredText) {
 			deleteAllError = `Please type the exact text: "${requiredText}"`;
@@ -356,13 +371,23 @@
 
 	async function selectType(v) {
 		typeFilter = v;
+		currentPage = 1;
 		showTypeMenu = false;
 		await loadCategories(v);
 	}
 
 	function selectCategory(name) {
 		categoryFilter = name;
+		currentPage = 1;
 		showCategoryMenu = false;
+	}
+
+	function prevPage() {
+		currentPage = Math.max(1, currentPage - 1);
+	}
+
+	function nextPage() {
+		currentPage = Math.min(totalPages, currentPage + 1);
 	}
 
 	/* labels for buttons */
@@ -388,7 +413,7 @@
 				aria-label="Delete all transactions"
 				title="Delete all transactions"
 			>
-				<img class="icon" src={trashIcon} alt="" />
+				<img class="icon" src={trashRedIcon} alt="" />
 			</button>
 		</div>
 
@@ -402,6 +427,7 @@
 					type="search"
 					placeholder="Search transactions..."
 					bind:value={q}
+					on:input={() => (currentPage = 1)}
 				/>
 			</label>
 
@@ -573,7 +599,7 @@
 			<p class="empty">No transactions found.</p>
 		{:else}
 			<ul class="tx-list" role="list">
-				{#each filtered as t (t.id)}
+				{#each paged as t (t.id)}
 					<li class="tx-item">
 						<div class="left">
 							<span class="badge {t.type}">{t.category}</span>
@@ -612,6 +638,16 @@
 					</li>
 				{/each}
 			</ul>
+
+			<!-- Pagination Controls -->
+			<div class="pagination" aria-label="Pagination" style="display: flex; align-items: center; gap: 12px; justify-content: flex-end; margin-top: 12px;">
+				<button type="button" on:click={prevPage} disabled={currentPage === 1} aria-label="Previous page">Prev</button>
+				<span>Page {currentPage} of {totalPages}</span>
+				<span>
+					Showing {filtered.length === 0 ? 0 : pageStart + 1}–{Math.min(pageStart + PAGE_SIZE, filtered.length)} of {filtered.length}
+				</span>
+				<button type="button" on:click={nextPage} disabled={currentPage === totalPages} aria-label="Next page">Next</button>
+			</div>
 		{/if}
 	</div>
 </section>
@@ -660,12 +696,15 @@
 			aria-modal="true"
 			tabindex="-1"
 		>
-			<h3 id="delete-all-title">⚠️ Delete All Transactions</h3>
+			<h3 id="delete-all-title">
+				<img src={warningIcon} alt="Warning" class="warning-icon" />
+				Delete All Transactions
+			</h3>
 			<div class="delete-all-warning">
 				<p><strong>This action cannot be undone!</strong></p>
 				<p>You are about to permanently delete <strong>all</strong> of your transactions. This process is not reversible.</p>
 				<p style="margin-top: 16px;">If you are absolutely sure you want to delete all your transactions, please type the following text in the field below:</p>
-				<div class="required-text">Yes I would like to delete all the transactions</div>
+				<div class="required-text">Delete all transactions</div>
 			</div>
 
 			{#if deleteAllError}
@@ -693,7 +732,7 @@
 					type="button"
 					class="btn-delete-all"
 					on:click={confirmDeleteAll}
-					disabled={isDeleting || deleteAllConfirmation !== 'Yes I would like to delete all the transactions'}
+					disabled={isDeleting || deleteAllConfirmation !== 'Delete all transactions'}
 				>
 					{isDeleting ? 'Deleting...' : 'Delete All Transactions'}
 				</button>

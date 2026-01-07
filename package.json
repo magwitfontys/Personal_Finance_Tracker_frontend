@@ -11,13 +11,15 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "format": "prettier --write .",
-    "lint": "prettier --check . && eslint ."
+    "lint": "prettier --check . && eslint .",
+    "audit": "npm audit",
+    "audit:fix": "npm audit fix"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.5",
     "@eslint/js": "^9.22.0",
-    "@sveltejs/adapter-static": "^3.0.10",
-    "@sveltejs/kit": "^2.22.0",
+    "@sveltejs/adapter-static": "latest",
+    "@sveltejs/kit": "latest",
     "@sveltejs/vite-plugin-svelte": "^6.0.0",
     "@types/node": "^22.0.0",
     "eslint": "^9.22.0",
@@ -39,6 +41,7 @@
     "node": ">=20"
   },
   "dependencies": {
-    "chart.js": "^4.5.1"
+    "chart.js": "^4.5.1",
+    "cookie": "^0.7.0"
   }
 }

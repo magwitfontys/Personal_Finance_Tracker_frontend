@@ -35,14 +35,14 @@
 						data: incomeData,
 						backgroundColor: 'rgba(102, 187, 106, 0.9)',
 						borderRadius: 4,
-						barThickness: 50
+						barThickness: 16
 					},
 					{
 						label: 'Expenses',
 						data: expenseData,
 						backgroundColor: 'rgba(239, 83, 80, 0.9)',
 						borderRadius: 4,
-						barThickness: 50
+						barThickness: 16
 					}
 				]
 			},
@@ -51,7 +51,18 @@
 				maintainAspectRatio: false,
 				plugins: {
 					legend: {
-						display: false
+						display: true,
+						position: 'bottom',
+						labels: {
+							padding: 15,
+							font: {
+								size: 14,
+								weight: '500'
+							},
+							color: '#333',
+							usePointStyle: true,
+							pointStyle: 'circle'
+						}
 					},
 					tooltip: {
 						enabled: true,
@@ -85,10 +96,8 @@
 							font: {
 								size: 12
 							},
-							color: '#666',
-							stepSize: 850
-						},
-						max: 3400
+							color: '#666'
+						}
 					}
 				}
 			}
@@ -105,6 +114,16 @@
 		chartInstance.data.labels = labels;
 		chartInstance.data.datasets[0].data = incomeData;
 		chartInstance.data.datasets[1].data = expenseData;
+		
+		// Calculate dynamic max value (120% of highest value)
+		const maxIncome = Math.max(...incomeData, 0);
+		const maxExpense = Math.max(...expenseData, 0);
+		const maxValue = Math.max(maxIncome, maxExpense);
+		const dynamicMax = maxValue * 1.2;
+		
+		chartInstance.options.scales.y.max = dynamicMax;
+		chartInstance.options.scales.y.ticks.stepSize = undefined; // Let Chart.js calculate steps
+		
 		chartInstance.update();
 	}
 </script>

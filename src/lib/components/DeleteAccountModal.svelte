@@ -3,6 +3,7 @@
 	import { resolve } from '$app/paths';
 	import { browser } from '$app/environment';
 	import { auth } from '$lib/stores/authStore';
+	import warningIcon from '$lib/pictures/triangle-warning.png';
 
 	export let isOpen = false;
 	export let password = '';
@@ -64,7 +65,10 @@
 			aria-modal="true"
 			tabindex="-1"
 		>
-			<h3 id="delete-confirmation-title">⚠️ Delete Account</h3>
+			<h3 id="delete-confirmation-title">
+				<img src={warningIcon} alt="Warning" class="warning-icon" />
+				Delete Account
+			</h3>
 			<div class="delete-account-warning">
 				<p><strong>This action cannot be undone!</strong></p>
 				<p>You are about to permanently delete your account and all associated data (transactions, categories, settings). This process is not reversible.</p>

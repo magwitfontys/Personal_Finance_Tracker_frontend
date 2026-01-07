@@ -467,18 +467,29 @@
 /* toast */
 .toast {
   position: fixed;
-  left: 50%;
-  bottom: 1.5rem;
-  transform: translateX(-50%);
+  right: 24px;
+  bottom: 24px;
   display: inline-flex;
   align-items: center;
   gap: 0.7rem;
   padding: 0.8rem 1.4rem;
   background: #ffffff;
-  border-radius: 999px;
-  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.25);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   font-size: 0.95rem;
-  z-index: 60;
+  z-index: 9999;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 .toast-icon {

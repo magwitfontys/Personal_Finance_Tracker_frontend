@@ -45,7 +45,7 @@
 .select,
 .textarea {
   width: 100%;
-  border: 1px solid transparent;
+  border: 1px solid #d9dbe0;
   background: #f3f3f6;
   color: #111;
   padding: 0.9rem 0.9rem;
@@ -73,49 +73,41 @@
   margin-top: 0.35rem;
 }
 
-/* Type chips (Expense / Income) */
+/* Type toggle - radio buttons matching edit transaction */
 .type-toggle {
   display: flex;
+  gap: 16px;
   align-items: center;
-  gap: 1.5rem;
 }
 
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.2rem 0.35rem;
-  border: none;
-  background: transparent;
+.type-toggle input {
+  margin: 0;
   cursor: pointer;
-  border-radius: 999px;
-  user-select: none;
 }
 
-.chip .dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  border: 2px solid #ddd;
-  background: transparent;
+.toggle-option.expense input {
+  accent-color: #c53030;
 }
 
-.chip.expense .chip-text {
-  color: #d34a4a;
-} /* red */
-.chip.income .chip-text {
-  color: #229954;
-} /* green */
-
-/* SELECTED DOT COLORS */
-.chip.expense.active .dot {
-  border-color: #d34a4a;
-  background: #d34a4a; /* red */
+.toggle-option.income input {
+  accent-color: #2f855a;
 }
 
-.chip.income.active .dot {
-  border-color: #229954;
-  background: #229954; /* green */
+.toggle-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 0;
+}
+
+.toggle-option.expense span {
+  color: #c53030;
+}
+
+.toggle-option.income span {
+  color: #2f855a;
 }
 
 /* Actions */
@@ -168,20 +160,22 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.9rem 0.95rem;
+  padding: 0.9rem 0.9rem;
   border-radius: 12px;
-  border: 1px solid transparent;
-  background: #f3f3f6;
+  border: 1px solid #d9dbe0;
+  background: #f3f3f6 !important;
   font: inherit;
   color: #111;
   cursor: pointer;
   transition: border 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  box-sizing: border-box;
+  text-align: left;
 }
 
 .menu-btn:focus-visible {
   outline: none;
   border: 1px solid #111;
-  background: #f7f7fa;
+  background: #f7f7fa !important;
   box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.08);
 }
 

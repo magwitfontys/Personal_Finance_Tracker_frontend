@@ -1,0 +1,37 @@
+version: 2
+updates:
+  # npm (Node.js/SvelteKit) dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "12:00"
+    open-pull-requests-limit: 5
+    pull-request-branch-name:
+      separator: "/"
+    reviewers:
+      - "magwi"
+    allow:
+      - dependency-type: "all"
+    commit-message:
+      prefix: "build(deps):"
+      include: "scope"
+    ignore:
+      # Add any dependencies here that should not be auto-updated
+      # Example: - dependency-name: "some-package"
+
+  # GitHub Actions (CI/CD)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "10:00"
+    open-pull-requests-limit: 5
+    pull-request-branch-name:
+      separator: "/"
+    reviewers:
+      - "magwi"
+    commit-message:
+      prefix: "ci(deps):"
+      include: "scope"
