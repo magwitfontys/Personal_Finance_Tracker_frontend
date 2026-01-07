@@ -3,7 +3,7 @@
 	import { browser } from '$app/environment';
 	import { auth } from '$lib/stores/authStore';
 	import { env } from '$env/dynamic/public';
-	import { SvelteMap } from 'svelte/reactivity';
+	import { SvelteMap, SvelteDate } from 'svelte/reactivity';
 	import BarChart from '$lib/components/BarChart.svelte';
 	import PieChart from '$lib/components/PieChart.svelte';
 	import '$lib/styles/dashboard.css';
@@ -160,19 +160,19 @@
 		// Apply timeframe filter for pie chart
 		let filteredTx = transactions;
 		if (timeframe !== 'lifetime') {
-			const now = new Date();
+			const now = new SvelteDate();
 			let startDate;
 			switch (timeframe) {
 				case '1m':
-					startDate = new Date(now);
+					startDate = new SvelteDate(now);
 					startDate.setMonth(startDate.getMonth() - 1);
 					break;
 				case '3m':
-					startDate = new Date(now);
+					startDate = new SvelteDate(now);
 					startDate.setMonth(startDate.getMonth() - 3);
 					break;
 				case '1y':
-					startDate = new Date(now);
+					startDate = new SvelteDate(now);
 					startDate.setFullYear(startDate.getFullYear() - 1);
 					break;
 			}
