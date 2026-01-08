@@ -7,9 +7,10 @@
 	import chart from '$lib/pictures/chart.png';
 
 	let mode = 'login';
-	
+	let successMessage = '';
+	let successTimeout;
 
-	let login = { username: '', password: '', show: false, busy: false, error: '' };
+	let login = { username: '', password: '', show: false, busy: false, error: '', errorTimeout: null };
 	let signup = {
 		username: '',
 		password: '',
@@ -18,13 +19,60 @@
 		show2: false,
 		busy: false,
 		error: '',
+		errorTimeout: null,
 		ok: ''
 	};
 
 	onMount(() => {
 		if (!browser) return;
 		if (location.hash === '#register') mode = 'register';
+
+		// Check for success message in URL params
+		const params = new URLSearchParams(window.location.search);
+		const msg = params.get('success');
+		if (msg) {
+			successMessage = decodeURIComponent(msg);
+			setSuccessTimeout();
+			// Clean up URL
+			window.history.replaceState({}, document.title, window.location.pathname);
+		}
 	});
+
+	function setSuccessTimeout() {
+		if (successTimeout) clearTimeout(successTimeout);
+		successTimeout = setTimeout(() => {
+			successMessage = '';
+		}, 5000);
+	}
+
+	function clearSuccessMessage() {
+		if (successTimeout) clearTimeout(successTimeout);
+		successMessage = '';
+	}
+
+	function setLoginErrorTimeout() {
+		if (login.errorTimeout) clearTimeout(login.errorTimeout);
+		login.errorTimeout = setTimeout(() => {
+			login.error = '';
+		}, 5000);
+	}
+
+	function clearLoginError() {
+		if (login.errorTimeout) clearTimeout(login.errorTimeout);
+		login.error = '';
+	}
+
+	function setSignupErrorTimeout() {
+		if (signup.errorTimeout) clearTimeout(signup.errorTimeout);
+		signup.errorTimeout = setTimeout(() => {
+			signup.error = '';
+		}, 5000);
+	}
+
+	function clearSignupError() {
+		if (signup.errorTimeout) clearTimeout(signup.errorTimeout);
+		signup.error = '';
+	}
 
 	async function postJSON(path, body) {
 		try {
@@ -82,14 +130,18 @@
 				// Store userId if provided, otherwise use 1 as default
 				const userId = data.userId || data.user_id || 1;
 				localStorage.setItem('userId', userId.toString());
+				// Clear password field
+				login.password = '';
 				// standard navigation to avoid goto() check
 				window.location.href = '/dashboard';
 				} else {
 					login.error = 'Login failed.';
+					setLoginErrorTimeout();
 				}
 			}
 		} catch (err) {
 			login.error = err.message;
+			setLoginErrorTimeout();
 		} finally {
 			login.busy = false;
 		}
@@ -99,6 +151,7 @@
 		e.preventDefault();
 		if (!signupValid) {
 			signup.error = 'Please fix the fields.';
+			setSignupErrorTimeout();
 			return;
 		}
 		signup.error = '';
@@ -107,11 +160,22 @@
 		try {
 			await postJSON('/auth/register', { username: signup.username, password: signup.password });
 			signup.ok = 'Account created. Log in now.';
+			// Clear all fields
+			signup.username = '';
+			signup.password = '';
+			signup.confirm = '';
+			// Redirect to login with success message
 			mode = 'login';
-			login.username = signup.username;
-			login.password = '';
+			successMessage = 'Account created successfully! Please log in.';
+			setSuccessTimeout();
 		} catch (err) {
-			signup.error = err.message;
+			// Check for specific error messages and provide user-friendly responses
+			if (err.message.toLowerCase().includes('username already exists') || err.message.toLowerCase().includes('unique constraint')) {
+				signup.error = `The username "${signup.username}" is already taken. Please choose a different one.`;
+			} else {
+				signup.error = err.message;
+			}
+			setSignupErrorTimeout();
 		} finally {
 			signup.busy = false;
 		}
@@ -185,7 +249,24 @@
 						</div>
 					</label>
 
-					{#if login.error}<p class="msg error">{login.error}</p>{/if}
+					{#if successMessage}
+						<div class="alert alert-success">
+							<span>{successMessage}</span>
+							<button type="button" class="alert-close" on:click={clearSuccessMessage} aria-label="Close alert">
+								✕
+							</button>
+						</div>
+					{/if}
+
+					{#if login.error}
+						<div class="alert alert-error">
+							<span>{login.error}</span>
+							<button type="button" class="alert-close" on:click={clearLoginError} aria-label="Close alert">
+								✕
+							</button>
+						</div>
+					{/if}
+
 					<button class="primary" disabled={login.busy}
 						>{login.busy ? 'Logging in…' : 'Login'}</button
 					>
@@ -261,8 +342,14 @@
 						</div>
 					</label>
 
-					{#if signup.error}<p class="msg error">{signup.error}</p>{/if}
-					{#if signup.ok}<p class="msg ok">{signup.ok}</p>{/if}
+					{#if signup.error}
+						<div class="alert alert-error">
+							<span>{signup.error}</span>
+							<button type="button" class="alert-close" on:click={clearSignupError} aria-label="Close alert">
+								✕
+							</button>
+						</div>
+					{/if}
 
 					<button class="primary" disabled={signup.busy}
 						>{signup.busy ? 'Creating…' : 'Create Account'}</button

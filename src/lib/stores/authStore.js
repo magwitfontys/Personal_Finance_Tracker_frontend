@@ -31,6 +31,18 @@ if (typeof window !== 'undefined') {
 		}
 	}
 
+	// Verify session with backend on initialization
+	// If backend is down or user not found, clear the stored credentials
+	if (hydrated) {
+		const userId = localStorage.getItem('userId');
+		if (userId) {
+			verifySessionWithBackend(userId).catch(() => {
+				// Backend unreachable or session invalid - clear stored credentials
+				clearAuth();
+			});
+		}
+	}
+
 	// Keep localStorage in sync and always store a proper JSON object
 	auth.subscribe((v) => {
 		try {
@@ -50,4 +62,40 @@ if (typeof window !== 'undefined') {
 			/* ignore write errors */
 		}
 	});
+}
+
+/**
+ * Verify session with backend
+ * Throws an error if verification fails
+ */
+async function verifySessionWithBackend(userId) {
+	try {
+		const apiBase = typeof window !== 'undefined' ? window.location.origin : '';
+		const response = await fetch(`${apiBase}/api/auth/verify?userId=${encodeURIComponent(userId)}`, {
+			method: 'GET',
+			headers: { 'Content-Type': 'application/json' }
+		});
+
+		if (!response.ok) {
+			throw new Error(`Backend verification failed with status ${response.status}`);
+		}
+
+		return await response.json();
+	} catch (err) {
+		console.warn('Session verification failed:', err.message);
+		throw err;
+	}
+}
+
+/**
+ * Clear all authentication data from localStorage
+ */
+function clearAuth() {
+	auth.set({ username: null, token: null });
+	if (typeof window !== 'undefined') {
+		localStorage.removeItem('auth');
+		localStorage.removeItem('token');
+		localStorage.removeItem('username');
+		localStorage.removeItem('userId');
+	}
 }
